@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useCoach } from "@/context/CoachContext";
+import { submitCheckInAction } from "@/server/actions/checkins";
 import {
   X,
   Sparkles,
@@ -9,7 +10,6 @@ import {
   Clock,
   Gauge,
   MessageSquare,
-  ArrowRight,
   TrendingDown,
   TrendingUp,
   RefreshCw,
@@ -49,11 +49,11 @@ export const CheckInModal: React.FC = () => {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
       const proposal = submitCheckIn({
         completedTaskIds: selectedTaskIds,
         actualMinutesSpent: actualMinutes,
@@ -64,9 +64,30 @@ export const CheckInModal: React.FC = () => {
         confidenceScore: difficulty <= 2 ? 5 : difficulty === 3 ? 4 : 2,
       });
 
+      // Persist to Supabase if authenticated
+      try {
+        await submitCheckInAction({
+          goalId: activeGoal.id,
+          date: new Date().toISOString().split("T")[0],
+          completedTaskIds: selectedTaskIds,
+          actualMinutesSpent: actualMinutes,
+          perceivedDifficulty: difficulty,
+          blockers,
+          reflectionNotes: reflection,
+          mood,
+          confidenceScore: difficulty <= 2 ? 5 : difficulty === 3 ? 4 : 2,
+          aiFeedbackSummary: proposal.triggerReason,
+        });
+      } catch (err) {
+        // Ignored in guest mode
+      }
+
       setGeneratedProposal(proposal);
+    } catch (err) {
+      console.error("Check-in error:", err);
+    } finally {
       setIsSubmitting(false);
-    }, 600);
+    }
   };
 
   const handleApplyAdaptation = () => {
@@ -221,7 +242,7 @@ export const CheckInModal: React.FC = () => {
               <textarea
                 value={blockers}
                 onChange={(e) => setBlockers(e.target.value)}
-                placeholder="e.g. Aaj college ka exam tha toh sirf 30 min mila, ya do-pointer ke recursion base condition me confusion hui..."
+                placeholder="e.g. Aaj college ka exam tha toh sirf 30 min mila, ya recursion base condition me confusion hui..."
                 rows={3}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-surfaceLight/50 border border-surfaceBorder text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-primary-500/70 focus:ring-1 focus:ring-primary-500"
               />

@@ -1,22 +1,55 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useCoach } from "@/context/CoachContext";
 import {
   CalendarCheck2,
   Sparkles,
   Award,
   CheckCircle,
-  AlertTriangle,
   ArrowRight,
-  TrendingUp,
-  Clock,
-  Target,
+  RefreshCw,
   BrainCircuit,
+  Zap,
 } from "lucide-react";
 
 export const WeeklyReviewView: React.FC = () => {
   const { weeklyReview, activeGoal } = useCoach();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [currentSummary, setCurrentSummary] = useState(weeklyReview.aiExecutiveSummary);
+
+  const handleRefreshReview = async () => {
+    setIsRefreshing(true);
+    try {
+      // Call coach API to synthesize fresh evaluation
+      const res = await fetch("/api/ai/coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: "Please generate a 2-paragraph executive retrospective summary of my weekly progress, highlighting strong patterns, weak areas, and calibrated next steps.",
+          context: {
+            goalTitle: activeGoal?.title || "Mastery Track",
+            currentLevel: activeGoal?.currentLevel || "intermediate",
+            streakDays: 7,
+            weakAreas: activeGoal?.weakAreas || ["Recursion & Backtracking"],
+            strongAreas: activeGoal?.strongAreas || ["Arrays & Two Pointers"],
+            targetDailyMinutes: activeGoal?.dailyMinutesTarget || 60,
+          },
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) {
+          setCurrentSummary(data.reply);
+        }
+      }
+    } catch (e) {
+      console.warn("Weekly review refresh fallback", e);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -38,11 +71,20 @@ export const WeeklyReviewView: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="px-3.5 py-2 rounded-xl bg-accent-emerald/15 border border-accent-emerald/30 text-accent-emerald text-xs font-bold flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
               <span>{weeklyReview.consistencyScorePercent}% Consistency Score</span>
             </span>
+            <button
+              onClick={handleRefreshReview}
+              disabled={isRefreshing}
+              className="px-3 py-2 rounded-xl bg-surface border border-surfaceBorder hover:border-primary-500 text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-all disabled:opacity-50"
+              title="Generate fresh AI insights"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-primary-400" : "text-slate-400"}`} />
+              <span>{isRefreshing ? "Re-evaluating..." : "Re-evaluate"}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -106,9 +148,9 @@ export const WeeklyReviewView: React.FC = () => {
           </div>
         </div>
 
-        <p className="text-xs text-slate-200 leading-relaxed p-4 rounded-xl bg-surfaceLight/50 border border-surfaceBorder">
-          "{weeklyReview.aiExecutiveSummary}"
-        </p>
+        <div className="text-xs text-slate-200 leading-relaxed p-4 rounded-xl bg-surfaceLight/50 border border-surfaceBorder whitespace-pre-line">
+          {currentSummary}
+        </div>
       </div>
 
       {/* Wins & Next Week Roadmap Calibration */}
