@@ -3,20 +3,18 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCoach } from "@/context/CoachContext";
+import { createGoalWithMilestonesAction } from "@/server/actions/goals";
 import {
   BrainCircuit,
   Sparkles,
   ArrowRight,
   ArrowLeft,
   CheckCircle2,
-  Clock,
   Calendar,
-  Layers,
-  GraduationCap,
   Code2,
   Languages,
   Briefcase,
-  Flame,
+  GraduationCap,
   Check,
   RefreshCw,
 } from "lucide-react";
@@ -79,15 +77,95 @@ export default function OnboardingPage() {
     setGoalDescription(preset.desc);
   };
 
-  const handleGenerateRoadmap = () => {
+  const handleGenerateRoadmap = async () => {
     setIsGenerating(true);
 
-    // Simulate multi-step AI milestone synthesis
-    setTimeout(() => setGeneratingMilestone(1), 800);
-    setTimeout(() => setGeneratingMilestone(2), 1600);
-    setTimeout(() => setGeneratingMilestone(3), 2400);
+    const stepTimer1 = setTimeout(() => setGeneratingMilestone(1), 600);
+    const stepTimer2 = setTimeout(() => setGeneratingMilestone(2), 1200);
+    const stepTimer3 = setTimeout(() => setGeneratingMilestone(3), 1800);
 
-    setTimeout(() => {
+    try {
+      // Call live AI planner API
+      const res = await fetch("/api/ai/planner", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: goalTitle,
+          description: goalDescription,
+          targetDeadline: deadline,
+          currentLevel: level,
+          dailyMinutesTarget: dailyMinutes,
+          preferredSchedule: schedule,
+          category: goalCategory,
+        }),
+      });
+
+      let milestones: any[] = [];
+      if (res.ok) {
+        const data = await res.json();
+        if (data.milestones && data.milestones.length > 0) {
+          milestones = data.milestones.map((m: any, idx: number) => ({
+            id: `ms-${Date.now()}-${idx + 1}`,
+            goalId: `goal-${Date.now()}`,
+            title: m.title,
+            description: m.description,
+            order: m.order || idx + 1,
+            status: idx === 0 ? "in_progress" : "locked",
+            estimatedDays: m.estimatedDays || 14,
+            tasks: (m.tasks || []).map((t: any, tIdx: number) => ({
+              id: `task-${Date.now()}-${idx + 1}-${tIdx + 1}`,
+              milestoneId: `ms-${Date.now()}-${idx + 1}`,
+              title: t.title,
+              description: t.description,
+              difficulty: t.difficulty || "medium",
+              estimatedMinutes: t.estimatedMinutes || dailyMinutes,
+              dueDate: new Date().toISOString().split("T")[0],
+              status: "pending",
+              priority: t.priority || "medium",
+              topic: t.topic || "Core",
+            })),
+          }));
+        }
+      }
+
+      // Save into store
+      const created = createNewGoal({
+        title: goalTitle,
+        description: goalDescription,
+        targetDeadline: deadline,
+        currentLevel: level,
+        dailyMinutesTarget: dailyMinutes,
+        preferredSchedule: schedule,
+        category: goalCategory as any,
+        milestones: milestones.length > 0 ? milestones : undefined,
+      });
+
+      // Attempt Supabase server action persistence (if user is authenticated)
+      try {
+        if (created) {
+          await createGoalWithMilestonesAction({
+            title: created.title,
+            description: created.description,
+            targetDeadline: created.targetDeadline,
+            currentLevel: created.currentLevel,
+            dailyMinutesTarget: created.dailyMinutesTarget,
+            preferredSchedule: created.preferredSchedule,
+            status: created.status,
+            category: created.category,
+            weakAreas: created.weakAreas,
+            strongAreas: created.strongAreas,
+            milestones: created.milestones,
+          });
+        }
+      } catch (e) {
+        // Ignored if guest mode
+      }
+
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 600);
+    } catch (err) {
+      console.warn("AI planner error, creating standard goal:", err);
       createNewGoal({
         title: goalTitle,
         description: goalDescription,
@@ -97,9 +175,12 @@ export default function OnboardingPage() {
         preferredSchedule: schedule,
         category: goalCategory as any,
       });
-
       router.push("/dashboard");
-    }, 3200);
+    } finally {
+      clearTimeout(stepTimer1);
+      clearTimeout(stepTimer2);
+      clearTimeout(stepTimer3);
+    }
   };
 
   return (
@@ -405,7 +486,7 @@ export default function OnboardingPage() {
                       ) : (
                         <RefreshCw className="h-4 w-4 animate-spin shrink-0" />
                       )}
-                      <span>Breaking down into 5 progressive milestones...</span>
+                      <span>Breaking down into progressive milestones...</span>
                     </div>
 
                     <div
@@ -435,7 +516,7 @@ export default function OnboardingPage() {
                       ) : (
                         <div className="h-4 w-4 rounded-full border border-slate-600 shrink-0" />
                       )}
-                      <span>Setting up initial mission & daily coach briefing...</span>
+                      <span>Setting up initial missions & coach memory loop...</span>
                     </div>
                   </div>
                 </div>
