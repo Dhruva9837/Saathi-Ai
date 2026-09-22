@@ -7,15 +7,13 @@ import {
   Sparkles,
   BotMessageSquare,
   Volume2,
-  VolumeX,
   ArrowRight,
   Lightbulb,
-  CheckCircle,
   HelpCircle,
 } from "lucide-react";
 
 export const CoachDailyBriefing: React.FC = () => {
-  const { activeGoal, sendChatMessage } = useCoach();
+  const { activeGoal } = useCoach();
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const toggleAudio = () => {
@@ -33,26 +31,23 @@ export const CoachDailyBriefing: React.FC = () => {
       : "Your system architecture design is taking shape. Today focus on locking in the Supabase schema and PostgreSQL indexes.";
 
   return (
-    <div className="rounded-2xl glass-panel-glow border border-primary-500/30 bg-gradient-to-br from-surface to-primary-950/40 p-6 shadow-xl relative overflow-hidden">
-      {/* AI Glow Ornament */}
+    <div className="rounded-xl border border-[#1E293B] bg-[#151E2E] p-6 shadow-sm">
+      {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary-500 to-accent-cyan shadow-lg shadow-primary-500/30">
-            <BotMessageSquare className="h-6 w-6 text-white" />
-            <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-accent-emerald border-2 border-surface">
-              <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-            </span>
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#6366F1] text-white shadow-sm">
+            <BotMessageSquare className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-white font-heading">
+              <h3 className="text-sm font-bold text-[#F8FAFC] font-heading">
                 AI Coach Daily Briefing
               </h3>
-              <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-accent-cyan/15 text-accent-cyan border border-accent-cyan/30">
-                Personalized
+              <span className="text-[10px] px-2 py-0.5 rounded font-semibold bg-[#1E293B] text-[#818CF8] border border-[#334155]">
+                Context Active
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-[#94A3B8]">
               Evaluated from your latest check-ins & weak areas
             </p>
           </div>
@@ -61,58 +56,49 @@ export const CoachDailyBriefing: React.FC = () => {
         {/* Audio Briefing Simulator */}
         <button
           onClick={toggleAudio}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
             isPlayingAudio
-              ? "bg-accent-cyan/20 border-accent-cyan text-accent-cyan animate-pulse"
-              : "bg-surfaceLight/60 border-surfaceBorder text-slate-300 hover:text-white hover:bg-surfaceLight"
+              ? "bg-[#1E293B] border-[#818CF8] text-[#818CF8]"
+              : "bg-[#0B1120] border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[#334155]"
           }`}
         >
-          {isPlayingAudio ? (
-            <>
-              <Volume2 className="h-4 w-4" />
-              <span>Playing Audio...</span>
-            </>
-          ) : (
-            <>
-              <Volume2 className="h-4 w-4 text-slate-400" />
-              <span>Listen (15s)</span>
-            </>
-          )}
+          <Volume2 className="h-3.5 w-3.5" />
+          <span>{isPlayingAudio ? "Playing..." : "Listen"}</span>
         </button>
       </div>
 
       {/* Quote Container */}
-      <div className="p-4 rounded-xl bg-surfaceLight/40 border border-surfaceBorder/60 relative">
-        <p className="text-xs text-slate-200 leading-relaxed italic">
+      <div className="p-4 rounded-lg bg-[#0B1120] border border-[#1E293B]">
+        <p className="text-xs text-[#F8FAFC] leading-relaxed">
           "{briefingText}"
         </p>
       </div>
 
-      {/* Quick Prompts */}
-      <div className="mt-4 pt-3 border-t border-surfaceBorder/60 flex flex-wrap items-center justify-between gap-2">
+      {/* Quick Actions */}
+      <div className="mt-4 pt-3 border-t border-[#1E293B] flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/dashboard/coach"
-            className="text-[11px] px-2.5 py-1 rounded-lg bg-surface border border-surfaceBorder hover:border-primary-500/40 text-slate-300 hover:text-primary-300 transition-colors flex items-center gap-1"
+            className="text-[11px] px-2.5 py-1 rounded-md bg-[#0B1120] border border-[#1E293B] hover:border-[#334155] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors flex items-center gap-1.5"
           >
-            <Lightbulb className="h-3 w-3 text-amber-400" />
+            <Lightbulb className="h-3 w-3 text-[#F59E0B]" />
             <span>I only have 30 mins today</span>
           </Link>
           <Link
             href="/dashboard/coach"
-            className="text-[11px] px-2.5 py-1 rounded-lg bg-surface border border-surfaceBorder hover:border-primary-500/40 text-slate-300 hover:text-primary-300 transition-colors flex items-center gap-1"
+            className="text-[11px] px-2.5 py-1 rounded-md bg-[#0B1120] border border-[#1E293B] hover:border-[#334155] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors flex items-center gap-1.5"
           >
-            <HelpCircle className="h-3 w-3 text-accent-cyan" />
+            <HelpCircle className="h-3 w-3 text-[#818CF8]" />
             <span>Break down two-pointer intuition</span>
           </Link>
         </div>
 
         <Link
           href="/dashboard/coach"
-          className="text-xs text-primary-400 hover:text-primary-300 font-semibold flex items-center gap-1 group"
+          className="text-xs text-[#818CF8] hover:text-[#A5B4FC] font-semibold flex items-center gap-1 group"
         >
           <span>Chat with Coach</span>
-          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
     </div>

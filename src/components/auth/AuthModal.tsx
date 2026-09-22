@@ -9,7 +9,6 @@ import {
   Lock,
   User,
   ArrowRight,
-  Sparkles,
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -68,7 +67,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           setSuccessMsg("Registration successful! Check your email to verify your account.");
         }
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -99,7 +98,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-background/80 backdrop-blur-md"
+            className="fixed inset-0 bg-[#0B1120]/80 backdrop-blur-sm"
           />
 
           {/* Modal Container */}
@@ -107,91 +106,91 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             initial={{ scale: 0.95, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 15 }}
-            transition={{ type: "spring", duration: 0.4 }}
-            className="relative w-full max-w-md rounded-2xl glass-panel-glow border border-surfaceBorder p-6 sm:p-8 shadow-2xl z-10"
+            transition={{ type: "spring", duration: 0.3 }}
+            className="relative w-full max-w-md rounded-xl border border-[#1E293B] bg-[#151E2E] p-6 sm:p-8 shadow-2xl z-10"
           >
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:text-white hover:bg-surfaceLight transition-colors"
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B] transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
 
             {/* Header */}
             <div className="text-center mb-6">
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary-600 to-accent-cyan shadow-lg shadow-primary-500/30">
-                <BrainCircuit className="h-6 w-6 text-white" />
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[#6366F1] text-white">
+                <BrainCircuit className="h-5 w-5" />
               </div>
-              <h2 className="text-2xl font-bold tracking-tight text-white font-heading">
-                {mode === "signin" ? "Welcome Back to Saathi" : "Begin Your AI Journey"}
+              <h2 className="text-xl font-bold tracking-tight text-[#F8FAFC] font-heading">
+                {mode === "signin" ? "Welcome Back" : "Create Account"}
               </h2>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-[#94A3B8]">
                 {mode === "signin"
-                  ? "Sign in to sync your adaptive learning goals & streaks"
-                  : "Create an account to get personalized AI roadmaps"}
+                  ? "Sign in to sync your adaptive goals & streaks"
+                  : "Sign up to start your personalized AI coaching"}
               </p>
             </div>
 
             {/* Error / Success Alerts */}
             {errorMsg && (
-              <div className="mb-4 flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+              <div className="mb-4 flex items-center gap-2 p-3 rounded-lg bg-[#EF4444]/15 border border-[#EF4444]/30 text-[#EF4444] text-xs">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             {successMsg && (
-              <div className="mb-4 flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs">
+              <div className="mb-4 flex items-center gap-2 p-3 rounded-lg bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] text-xs">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
                 <span>{successMsg}</span>
               </div>
             )}
 
             {/* Auth Form */}
-            <form onSubmit={handleAuth} className="space-y-3.5">
+            <form onSubmit={handleAuth} className="space-y-3">
               {mode === "signup" && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-medium text-[#F8FAFC] mb-1">
                     Your Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
                     <input
                       type="text"
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Dhruva"
-                      className="w-full rounded-xl bg-surface/80 border border-surfaceBorder pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                      className="w-full rounded-lg bg-[#0B1120] border border-[#1E293B] pl-9 pr-4 py-2 text-xs text-[#F8FAFC] placeholder-[#94A3B8] focus:border-[#818CF8] focus:outline-none"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-medium text-[#F8FAFC] mb-1">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@domain.com"
-                    className="w-full rounded-xl bg-surface/80 border border-surfaceBorder pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    placeholder="you@example.com"
+                    className="w-full rounded-lg bg-[#0B1120] border border-[#1E293B] pl-9 pr-4 py-2 text-xs text-[#F8FAFC] placeholder-[#94A3B8] focus:border-[#818CF8] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-medium text-[#F8FAFC] mb-1">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
                   <input
                     type="password"
                     required
@@ -199,7 +198,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full rounded-xl bg-surface/80 border border-surfaceBorder pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    className="w-full rounded-lg bg-[#0B1120] border border-[#1E293B] pl-9 pr-4 py-2 text-xs text-[#F8FAFC] placeholder-[#94A3B8] focus:border-[#818CF8] focus:outline-none"
                   />
                 </div>
               </div>
@@ -207,7 +206,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-indigo-600 py-2.5 text-xs font-semibold text-white shadow-lg shadow-primary-500/25 hover:from-primary-500 hover:to-indigo-500 transition-all hover:scale-[1.01] disabled:opacity-50"
+                className="w-full mt-2 flex items-center justify-center gap-2 rounded-lg bg-[#6366F1] hover:bg-[#4F46E5] py-2.5 text-xs font-semibold text-white shadow-sm transition-colors disabled:opacity-50"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -221,7 +220,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </form>
 
             {/* Toggle Mode */}
-            <div className="mt-5 text-center text-xs text-slate-400">
+            <div className="mt-4 text-center text-xs text-[#94A3B8]">
               {mode === "signin" ? (
                 <>
                   Don't have an account?{" "}
@@ -230,7 +229,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setMode("signup");
                       setErrorMsg(null);
                     }}
-                    className="font-semibold text-accent-cyan hover:underline"
+                    className="font-semibold text-[#818CF8] hover:underline"
                   >
                     Sign up
                   </button>
@@ -243,7 +242,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setMode("signin");
                       setErrorMsg(null);
                     }}
-                    className="font-semibold text-accent-cyan hover:underline"
+                    className="font-semibold text-[#818CF8] hover:underline"
                   >
                     Sign in
                   </button>

@@ -7,15 +7,10 @@ import {
   BotMessageSquare,
   Sparkles,
   User,
-  Zap,
-  Flame,
-  Lightbulb,
   Clock,
-  Layers,
-  HelpCircle,
-  RefreshCw,
   Mic,
   MicOff,
+  Flame,
 } from "lucide-react";
 
 export const CoachChatView: React.FC = () => {
@@ -48,8 +43,8 @@ export const CoachChatView: React.FC = () => {
     if (!isListening) {
       setTimeout(() => {
         setIsListening(false);
-        setInputText("Mujhe recursion ke base cases samajh nahi aa rahe, can you give me a simple intuition?");
-      }, 2500);
+        setInputText("I'm feeling stuck on today's algorithm. Can you break it down?");
+      }, 2000);
     }
   };
 
@@ -73,42 +68,37 @@ export const CoachChatView: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8.5rem)] rounded-2xl glass-panel border border-surfaceBorder bg-surface/90 overflow-hidden shadow-2xl">
-      {/* Context Awareness Header */}
-      <div className="p-4 border-b border-surfaceBorder bg-surfaceLight/40 flex flex-wrap items-center justify-between gap-3">
+    <div className="flex flex-col h-[calc(100vh-8.5rem)] rounded-xl border border-[#1E293B] bg-[#151E2E] overflow-hidden shadow-sm">
+      {/* Header */}
+      <div className="p-4 border-b border-[#1E293B] bg-[#0B1120] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="relative h-10 w-10 rounded-xl bg-gradient-to-tr from-primary-600 to-accent-cyan flex items-center justify-center text-white shadow-lg shadow-primary-500/20">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#6366F1] text-white">
             <BotMessageSquare className="h-5 w-5" />
-            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-accent-emerald border-2 border-surface" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-white font-heading">
-                AI Mentor & Decision Engine
+              <h2 className="text-sm font-bold text-[#F8FAFC]">
+                AI Coach
               </h2>
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-accent-emerald/20 text-accent-emerald border border-accent-emerald/30">
-                Context-Aware
+              <span className="text-[10px] px-2 py-0.5 rounded font-medium bg-[#1E293B] text-[#22C55E] border border-[#22C55E]/30">
+                Online
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">
-              Active Context: <span className="text-primary-300 font-medium">{activeGoal?.title || "Productivity"}</span>
+            <p className="text-[11px] text-[#94A3B8]">
+              Context: <span className="text-[#818CF8] font-medium">{activeGoal?.title || "Active Goal"}</span>
             </p>
           </div>
         </div>
 
         {/* Live Context Pills */}
         <div className="flex flex-wrap items-center gap-2 text-[10px]">
-          <span className="px-2.5 py-1 rounded-lg bg-surface border border-surfaceBorder text-slate-300 flex items-center gap-1">
-            <Flame className="h-3 w-3 text-amber-400" />
-            <span>Streak: {userProfile.streakDays}d</span>
+          <span className="px-2.5 py-1 rounded bg-[#151E2E] border border-[#1E293B] text-[#F59E0B] flex items-center gap-1">
+            <Flame className="h-3 w-3 fill-[#F59E0B]" />
+            <span>{userProfile.streakDays}d Streak</span>
           </span>
-          <span className="px-2.5 py-1 rounded-lg bg-surface border border-surfaceBorder text-rose-300 flex items-center gap-1">
-            <Zap className="h-3 w-3 text-rose-400" />
-            <span>Weak: {activeGoal?.weakAreas[0] || "Recursion"}</span>
-          </span>
-          <span className="px-2.5 py-1 rounded-lg bg-surface border border-surfaceBorder text-accent-cyan flex items-center gap-1">
-            <Clock className="h-3 w-3 text-accent-cyan" />
-            <span>Target: {activeGoal?.dailyMinutesTarget || 60}m</span>
+          <span className="px-2.5 py-1 rounded bg-[#151E2E] border border-[#1E293B] text-[#94A3B8] flex items-center gap-1">
+            <Clock className="h-3 w-3 text-[#818CF8]" />
+            <span>{activeGoal?.dailyMinutesTarget || 60}m Target</span>
           </span>
         </div>
       </div>
@@ -125,37 +115,36 @@ export const CoachChatView: React.FC = () => {
               }`}
             >
               {isCoach && (
-                <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center text-white shrink-0 shadow-md">
+                <div className="h-7 w-7 rounded-lg bg-[#6366F1] flex items-center justify-center text-white shrink-0 mt-0.5">
                   <BotMessageSquare className="h-4 w-4" />
                 </div>
               )}
 
               <div
-                className={`max-w-xl rounded-2xl p-4 text-xs leading-relaxed ${
+                className={`max-w-xl rounded-xl p-4 text-xs leading-relaxed ${
                   isCoach
-                    ? "bg-surfaceLight/70 border border-surfaceBorder text-slate-200"
-                    : "bg-gradient-to-r from-primary-600 to-indigo-600 text-white shadow-lg shadow-primary-500/15"
+                    ? "bg-[#0B1120] border border-[#1E293B] text-[#F8FAFC]"
+                    : "bg-[#6366F1] text-white"
                 }`}
               >
                 {msg.contextTag && (
-                  <div className="text-[10px] font-semibold text-primary-400 mb-1.5 flex items-center gap-1">
+                  <div className="text-[10px] font-semibold text-[#818CF8] mb-1.5 flex items-center gap-1">
                     <Sparkles className="h-2.5 w-2.5" />
                     <span>{msg.contextTag}</span>
                   </div>
                 )}
 
-                <div className="whitespace-pre-line prose prose-invert max-w-none text-xs">
+                <div className="whitespace-pre-line text-xs">
                   {msg.content}
                 </div>
 
-                {/* Suggested Action Buttons if any */}
                 {msg.suggestedActions && msg.suggestedActions.length > 0 && (
-                  <div className="mt-3 pt-2.5 border-t border-surfaceBorder/60 flex flex-wrap gap-2">
+                  <div className="mt-3 pt-2.5 border-t border-[#1E293B] flex flex-wrap gap-2">
                     {msg.suggestedActions.map((action, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleSend(action.label)}
-                        className="text-[11px] px-2.5 py-1 rounded-lg bg-surface border border-surfaceBorder hover:border-primary-500/50 text-slate-300 hover:text-white transition-colors"
+                        className="text-[11px] px-2.5 py-1 rounded bg-[#151E2E] border border-[#1E293B] hover:border-[#334155] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
                       >
                         {action.label}
                       </button>
@@ -165,7 +154,7 @@ export const CoachChatView: React.FC = () => {
 
                 <div
                   className={`text-[9px] mt-2 font-mono ${
-                    isCoach ? "text-slate-400" : "text-primary-200"
+                    isCoach ? "text-[#94A3B8]" : "text-white/80"
                   }`}
                 >
                   {msg.timestamp}
@@ -173,7 +162,7 @@ export const CoachChatView: React.FC = () => {
               </div>
 
               {!isCoach && (
-                <div className="h-8 w-8 rounded-xl bg-slate-700 flex items-center justify-center text-slate-300 shrink-0">
+                <div className="h-7 w-7 rounded-lg bg-[#1E293B] flex items-center justify-center text-[#94A3B8] shrink-0 mt-0.5">
                   <User className="h-4 w-4" />
                 </div>
               )}
@@ -183,14 +172,14 @@ export const CoachChatView: React.FC = () => {
 
         {isSending && (
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center text-white shrink-0">
+            <div className="h-7 w-7 rounded-lg bg-[#6366F1] flex items-center justify-center text-white shrink-0">
               <BotMessageSquare className="h-4 w-4" />
             </div>
-            <div className="p-3 rounded-2xl bg-surfaceLight/70 border border-surfaceBorder flex items-center gap-1.5 text-xs text-slate-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary-400 animate-bounce" />
-              <span className="h-1.5 w-1.5 rounded-full bg-primary-400 animate-bounce [animation-delay:0.2s]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-primary-400 animate-bounce [animation-delay:0.4s]" />
-              <span className="text-[11px] ml-1">Coach is thinking with your goal context...</span>
+            <div className="p-3 rounded-xl bg-[#0B1120] border border-[#1E293B] flex items-center gap-1.5 text-xs text-[#94A3B8]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#818CF8] animate-bounce" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#818CF8] animate-bounce [animation-delay:0.2s]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#818CF8] animate-bounce [animation-delay:0.4s]" />
+              <span className="text-[11px] ml-1">AI Coach is thinking...</span>
             </div>
           </div>
         )}
@@ -198,16 +187,16 @@ export const CoachChatView: React.FC = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Quick Prompt Suggestions */}
-      <div className="px-4 py-2 bg-surfaceLight/30 border-t border-surfaceBorder/60 flex items-center gap-2 overflow-x-auto">
-        <span className="text-[10px] font-semibold text-slate-400 uppercase shrink-0">
+      {/* Quick Prompts */}
+      <div className="px-4 py-2 bg-[#0B1120] border-t border-[#1E293B] flex items-center gap-2 overflow-x-auto">
+        <span className="text-[10px] font-semibold text-[#94A3B8] uppercase shrink-0">
           Quick Prompts:
         </span>
         {quickPrompts.map((qp, idx) => (
           <button
             key={idx}
             onClick={() => handleSend(qp.prompt)}
-            className="text-[11px] whitespace-nowrap px-2.5 py-1 rounded-lg bg-surface border border-surfaceBorder hover:border-primary-500/40 text-slate-300 hover:text-white transition-colors"
+            className="text-[11px] whitespace-nowrap px-2.5 py-1 rounded bg-[#151E2E] border border-[#1E293B] hover:border-[#334155] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
           >
             {qp.label}
           </button>
@@ -215,7 +204,7 @@ export const CoachChatView: React.FC = () => {
       </div>
 
       {/* Input Bar */}
-      <div className="p-4 border-t border-surfaceBorder bg-surface/90">
+      <div className="p-4 border-t border-[#1E293B] bg-[#151E2E]">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -223,16 +212,15 @@ export const CoachChatView: React.FC = () => {
           }}
           className="flex items-center gap-2"
         >
-          {/* Voice Input Simulator */}
           <button
             type="button"
             onClick={toggleMic}
-            className={`p-2.5 rounded-xl border transition-all ${
+            className={`p-2.5 rounded-lg border transition-colors ${
               isListening
-                ? "bg-rose-500/20 border-rose-500/50 text-rose-400 animate-pulse"
-                : "bg-surfaceLight border-surfaceBorder text-slate-400 hover:text-white"
+                ? "bg-[#EF4444]/20 border-[#EF4444] text-[#EF4444]"
+                : "bg-[#0B1120] border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC]"
             }`}
-            title="Simulate Voice Input"
+            title="Voice input simulation"
           >
             {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </button>
@@ -241,18 +229,14 @@ export const CoachChatView: React.FC = () => {
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder={
-              isListening
-                ? "Listening... Speak your question..."
-                : "Ask anything about your roadmap, concepts, or schedule..."
-            }
-            className="flex-1 px-4 py-2.5 rounded-xl bg-surfaceLight/60 border border-surfaceBorder text-xs text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            placeholder="Ask your coach anything about concepts, tasks, or pacing..."
+            className="flex-1 px-4 py-2 rounded-lg bg-[#0B1120] border border-[#1E293B] text-xs text-[#F8FAFC] placeholder-[#94A3B8] focus:outline-none focus:border-[#818CF8]"
           />
 
           <button
             type="submit"
             disabled={!inputText.trim() || isSending}
-            className="p-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-indigo-600 text-white shadow-md shadow-primary-500/25 hover:from-primary-500 hover:to-indigo-500 transition-all disabled:opacity-50"
+            className="p-2.5 rounded-lg bg-[#6366F1] hover:bg-[#4F46E5] text-white shadow-sm transition-colors disabled:opacity-50"
           >
             <Send className="h-4 w-4" />
           </button>
