@@ -17,6 +17,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { AdaptivePlanProposal } from "@/types";
+import { triggerLevelUpConfetti } from "@/lib/confetti";
 
 export const CheckInModal: React.FC = () => {
   const {
@@ -64,6 +65,8 @@ export const CheckInModal: React.FC = () => {
         confidenceScore: difficulty <= 2 ? 5 : difficulty === 3 ? 4 : 2,
       });
 
+      triggerLevelUpConfetti();
+
       // Persist to Supabase if authenticated
       try {
         await submitCheckInAction({
@@ -93,6 +96,7 @@ export const CheckInModal: React.FC = () => {
   const handleApplyAdaptation = () => {
     if (generatedProposal) {
       acceptAdaptiveProposal(generatedProposal.id);
+      triggerLevelUpConfetti();
       setIsCheckInModalOpen(false);
       setGeneratedProposal(null);
     }

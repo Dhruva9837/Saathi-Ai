@@ -31,6 +31,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
@@ -184,29 +185,36 @@ ALTER TABLE ai_insights ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_memories ENABLE ROW LEVEL SECURITY;
 
 -- Profiles Policy
+DROP POLICY IF EXISTS "Users can view and update their own profile" ON profiles;
 CREATE POLICY "Users can view and update their own profile" ON profiles
     FOR ALL USING (auth.uid() = id);
 
 -- Goals Policy
+DROP POLICY IF EXISTS "Users can manage their own goals" ON goals;
 CREATE POLICY "Users can manage their own goals" ON goals
     FOR ALL USING (auth.uid() = user_id);
 
 -- Milestones Policy
+DROP POLICY IF EXISTS "Users can manage milestones of their goals" ON milestones;
 CREATE POLICY "Users can manage milestones of their goals" ON milestones
     FOR ALL USING (EXISTS (SELECT 1 FROM goals WHERE goals.id = milestones.goal_id AND goals.user_id = auth.uid()));
 
 -- Tasks Policy
+DROP POLICY IF EXISTS "Users can manage tasks of their goals" ON tasks;
 CREATE POLICY "Users can manage tasks of their goals" ON tasks
     FOR ALL USING (EXISTS (SELECT 1 FROM goals WHERE goals.id = tasks.goal_id AND goals.user_id = auth.uid()));
 
 -- Checkins Policy
+DROP POLICY IF EXISTS "Users can manage their checkins" ON checkins;
 CREATE POLICY "Users can manage their checkins" ON checkins
     FOR ALL USING (auth.uid() = user_id);
 
 -- AI Insights Policy
+DROP POLICY IF EXISTS "Users can manage their ai insights" ON ai_insights;
 CREATE POLICY "Users can manage their ai insights" ON ai_insights
     FOR ALL USING (auth.uid() = user_id);
 
 -- AI Memories Policy
+DROP POLICY IF EXISTS "Users can manage their ai memories" ON ai_memories;
 CREATE POLICY "Users can manage their ai memories" ON ai_memories
     FOR ALL USING (auth.uid() = user_id);
