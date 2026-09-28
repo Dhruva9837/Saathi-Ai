@@ -11,14 +11,21 @@ import {
   Mic,
   MicOff,
   Flame,
+  Volume2,
+  VolumeX,
+  RotateCcw,
+  Sliders,
 } from "lucide-react";
+import Link from "next/link";
 
 export const CoachChatView: React.FC = () => {
   const { activeGoal, userProfile, chatMessages, sendChatMessage } = useCoach();
   const [inputText, setInputText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,6 +34,38 @@ export const CoachChatView: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages]);
+
+  // Initialize Speech Recognition if supported
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          if (transcript) {
+            setInputText((prev) => (prev ? `${prev} ${transcript}` : transcript));
+          }
+          setIsListening(false);
+        };
+
+        recognition.onerror = () => {
+          setIsListening(false);
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recognition;
+      }
+    }
+  }, []);
 
   const handleSend = async (textToSend?: string) => {
     const text = textToSend || inputText;
@@ -39,14 +78,69 @@ export const CoachChatView: React.FC = () => {
   };
 
   const toggleMic = () => {
-    setIsListening(!isListening);
-    if (!isListening) {
-      setTimeout(() => {
-        setIsListening(false);
-        setInputText("I'm feeling stuck on today's algorithm. Can you break it down?");
-      }, 2000);
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+          setIsListening(true);
+        } catch (e) {
+          setIsListening(false);
+        }
+      } else {
+        // Fallback demo simulation
+        setIsListening(true);
+        setTimeout(() => {
+          setIsListening(false);
+          setInputText("I have only 30 minutes today, please adjust my plan.");
+        }, 1500);
+      }
     }
   };
+
+  const handleSpeak = (msgId: string, text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+
+    if (speakingMsgId === msgId) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/[*_#`]/g, "");
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+
+    // Adjust pitch and rate based on persona
+    if (userProfile.coachPersona === "tough_love") {
+      utterance.rate = 1.1;
+      utterance.pitch = 0.95;
+    } else if (userProfile.coachPersona === "socratic") {
+      utterance.rate = 0.95;
+      utterance.pitch = 1.05;
+    } else if (userProfile.coachPersona === "analytical") {
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+    }
+
+    utterance.onend = () => setSpeakingMsgId(null);
+    utterance.onerror = () => setSpeakingMsgId(null);
+
+    setSpeakingMsgId(msgId);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const personaLabels: Record<string, string> = {
+    supportive: "🛡️ Empathetic Mentor",
+    tough_love: "⚔️ Drill Sergeant",
+    analytical: "🔬 Biohacker",
+    socratic: "🏛️ Socratic Strategist",
+  };
+
+  const activePersonaLabel =
+    personaLabels[userProfile.coachPersona || "supportive"] || "🛡️ Empathetic Mentor";
 
   const quickPrompts = [
     {
@@ -80,9 +174,14 @@ export const CoachChatView: React.FC = () => {
               <h2 className="text-sm font-bold text-[#F8FAFC]">
                 AI Coach
               </h2>
-              <span className="text-[10px] px-2 py-0.5 rounded font-medium bg-[#1E293B] text-[#22C55E] border border-[#22C55E]/30">
-                Online
-              </span>
+              <Link
+                href="/dashboard/settings"
+                className="text-[10px] px-2 py-0.5 rounded font-medium bg-[#151E2E] hover:bg-[#1E293B] text-[#818CF8] border border-[#818CF8]/40 flex items-center gap-1 transition-colors"
+                title="Change AI Coach Persona in Settings"
+              >
+                <span>{activePersonaLabel}</span>
+                <Sliders className="h-2.5 w-2.5" />
+              </Link>
             </div>
             <p className="text-[11px] text-[#94A3B8]">
               Context: <span className="text-[#818CF8] font-medium">{activeGoal?.title || "Active Goal"}</span>
@@ -107,6 +206,8 @@ export const CoachChatView: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
         {chatMessages.map((msg) => {
           const isCoach = msg.sender === "coach";
+          const isSpeaking = speakingMsgId === msg.id;
+
           return (
             <div
               key={msg.id}
@@ -121,18 +222,38 @@ export const CoachChatView: React.FC = () => {
               )}
 
               <div
-                className={`max-w-xl rounded-xl p-4 text-xs leading-relaxed ${
+                className={`max-w-xl rounded-xl p-4 text-xs leading-relaxed relative group ${
                   isCoach
                     ? "bg-[#0B1120] border border-[#1E293B] text-[#F8FAFC]"
                     : "bg-[#6366F1] text-white"
                 }`}
               >
-                {msg.contextTag && (
-                  <div className="text-[10px] font-semibold text-[#818CF8] mb-1.5 flex items-center gap-1">
-                    <Sparkles className="h-2.5 w-2.5" />
-                    <span>{msg.contextTag}</span>
-                  </div>
-                )}
+                <div className="flex items-center justify-between mb-1.5 gap-2">
+                  {msg.contextTag ? (
+                    <div className="text-[10px] font-semibold text-[#818CF8] flex items-center gap-1">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      <span>{msg.contextTag}</span>
+                    </div>
+                  ) : <div />}
+
+                  {isCoach && (
+                    <button
+                      onClick={() => handleSpeak(msg.id, msg.content)}
+                      className={`text-[10px] p-1 rounded-md transition-colors ${
+                        isSpeaking
+                          ? "bg-[#818CF8]/20 text-[#818CF8]"
+                          : "text-[#64748B] hover:text-[#CBD5E1] opacity-0 group-hover:opacity-100"
+                      }`}
+                      title={isSpeaking ? "Stop speech" : "Read aloud"}
+                    >
+                      {isSpeaking ? (
+                        <VolumeX className="h-3.5 w-3.5 text-[#818CF8] animate-pulse" />
+                      ) : (
+                        <Volume2 className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  )}
+                </div>
 
                 <div className="whitespace-pre-line text-xs">
                   {msg.content}
