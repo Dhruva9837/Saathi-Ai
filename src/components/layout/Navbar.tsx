@@ -48,9 +48,11 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {}
     setIsUserMenuOpen(false);
-    window.location.reload();
+    window.location.href = "/";
   };
 
   return (
@@ -153,42 +155,56 @@ export const Navbar: React.FC = () => {
               <span className="text-[#94A3B8]">{userProfile.totalXp} XP</span>
             </div>
 
-            {/* User Profile / Auth Button */}
-            {authUser ? (
+            {/* User Profile Dropdown / Sign Out */}
+            {userProfile?.name ? (
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-2 pl-2 border-l border-[#1E293B] hover:opacity-85 transition-opacity"
                 >
-                  <div className="h-8 w-8 rounded-full bg-[#1E293B] border border-[#334155] overflow-hidden">
-                    <img
-                      src={userProfile.avatarUrl}
-                      alt={authUser.email}
-                      className="h-full w-full rounded-full object-cover"
-                    />
+                  <div className="h-8 w-8 rounded-full bg-[#1E293B] border border-[#334155] overflow-hidden flex items-center justify-center text-xs font-bold text-[#818CF8]">
+                    {userProfile.avatarUrl ? (
+                      <img
+                        src={userProfile.avatarUrl}
+                        alt={userProfile.name}
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    ) : (
+                      userProfile.name.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div className="hidden xl:block text-left">
                     <div className="text-xs font-semibold text-[#F8FAFC] leading-tight">
-                      {authUser.user_metadata?.name || userProfile.name}
+                      {authUser?.user_metadata?.name || userProfile.name}
                     </div>
                     <div className="text-[10px] text-[#22C55E] flex items-center gap-1">
                       <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" />
-                      Synced
+                      Active
                     </div>
                   </div>
+                  <ChevronDown className="h-3 w-3 text-[#94A3B8] hidden xl:block" />
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl bg-[#151E2E] border border-[#1E293B] p-1.5 shadow-2xl z-50">
+                  <div className="absolute right-0 mt-2 w-56 rounded-xl bg-[#151E2E] border border-[#1E293B] p-1.5 shadow-2xl z-50 animate-in fade-in duration-150">
                     <div className="px-3 py-2 text-xs text-[#94A3B8] border-b border-[#1E293B]">
                       Signed in as
                       <div className="font-semibold text-[#F8FAFC] truncate mt-0.5">
-                        {authUser.email}
+                        {authUser?.email || userProfile.email}
                       </div>
                     </div>
+
+                    <Link
+                      href="/dashboard/settings"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="w-full mt-1 flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B] transition-colors font-medium"
+                    >
+                      <span>Settings & Persona</span>
+                    </Link>
+
                     <button
                       onClick={handleSignOut}
-                      className="w-full mt-1 flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors font-medium"
+                      className="w-full mt-0.5 flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors font-medium"
                     >
                       <LogOut className="h-3.5 w-3.5" />
                       <span>Sign Out</span>
