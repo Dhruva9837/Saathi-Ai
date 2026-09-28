@@ -24,11 +24,9 @@ export const CoachDailyBriefing: React.FC = () => {
   };
 
   const briefingText =
-    activeGoal?.id === "goal-dsa-1"
-      ? "Yesterday you mentioned feeling friction with boundary conditions on two pointers. Today I've scheduled 3 targeted reinforcement problems before we move on to Linked Lists. Stay patient and draw the pointers on paper!"
-      : activeGoal?.id === "goal-japanese-2"
-      ? "Great job on yesterday's Kanji retention! Today we're attacking N3 Bunpro Lesson 4. Spend extra time with the example sentences."
-      : "Your system architecture design is taking shape. Today focus on locking in the Supabase schema and PostgreSQL indexes.";
+    activeGoal?.milestones[0]
+      ? `Welcome to your focus session for "${activeGoal.title}"! Today's mission is to tackle the tasks in "${activeGoal.milestones[0].title}". Stay consistent and commit to your ${activeGoal.dailyMinutesTarget || 60}m daily target!`
+      : "Welcome to Saathi AI! Create a personalized roadmap to begin your daily adaptive coaching sessions.";
 
   return (
     <div className="rounded-xl border border-[#1E293B] bg-[#151E2E] p-6 shadow-sm">

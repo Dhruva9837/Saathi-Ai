@@ -15,17 +15,27 @@ export const QuickStats: React.FC = () => {
   const { activeGoal, userProfile } = useCoach();
 
   const totalTasks =
-    activeGoal?.milestones.reduce((acc, m) => acc + m.tasks.length, 0) || 12;
+    activeGoal?.milestones.reduce((acc, m) => acc + m.tasks.length, 0) || 0;
   const completedTasks =
     activeGoal?.milestones.reduce(
       (acc, m) => acc + m.tasks.filter((t) => t.status === "completed").length,
       0
-    ) || 4;
+    ) || 0;
 
-  const progressPercent = Math.min(
-    100,
-    Math.round((completedTasks / Math.max(totalTasks, 1)) * 100)
-  );
+  const progressPercent =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  const completedMinutes =
+    activeGoal?.milestones.reduce(
+      (acc, m) =>
+        acc +
+        m.tasks
+          .filter((t) => t.status === "completed")
+          .reduce((sum, t) => sum + (t.actualMinutes || t.estimatedMinutes), 0),
+      0
+    ) || 0;
+
+  const timeInvestedHours = (completedMinutes / 60).toFixed(1);
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
@@ -88,7 +98,7 @@ export const QuickStats: React.FC = () => {
         </div>
         <div className="my-2.5">
           <div className="text-2xl sm:text-3xl font-bold text-[#F8FAFC] font-mono">
-            31.5 <span className="text-xs text-[#94A3B8] font-sans font-normal">Hours</span>
+            {timeInvestedHours} <span className="text-xs text-[#94A3B8] font-sans font-normal">Hours</span>
           </div>
           <div className="text-[11px] text-[#94A3B8] mt-1">
             Target: {activeGoal?.dailyMinutesTarget || 60}m / day
