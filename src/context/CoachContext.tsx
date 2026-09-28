@@ -24,6 +24,8 @@ interface CoachContextType {
   activeGoal: Goal | null;
   setActiveGoalId: (id: string) => void;
   userProfile: UserProfile;
+  updateUserProfile: (profile: Partial<UserProfile>) => void;
+  updateActiveGoal: (goalData: Partial<Goal>) => void;
   todayTasks: Task[];
   toggleTaskStatus: (taskId: string) => void;
   checkIns: CheckIn[];
@@ -85,6 +87,17 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [goals, activeGoalId, userProfile, chatMessages]);
 
   const activeGoal = goals.find((g) => g.id === activeGoalId) || goals[0] || null;
+
+  const updateUserProfile = (profileUpdates: Partial<UserProfile>) => {
+    setUserProfile((prev) => ({ ...prev, ...profileUpdates }));
+  };
+
+  const updateActiveGoal = (goalUpdates: Partial<Goal>) => {
+    if (!activeGoal) return;
+    setGoals((prev) =>
+      prev.map((g) => (g.id === activeGoal.id ? { ...g, ...goalUpdates } : g))
+    );
+  };
 
   // Extract tasks for today
   const todayTasks: Task[] = React.useMemo(() => {
@@ -303,31 +316,69 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setChatMessages((prev) => [...prev, userMsg]);
 
-    // Generate intelligent AI coach response based on context
-    setTimeout(() => {
-      let reply = "";
-      const lower = content.toLowerCase();
+    try {
+      const res = await fetch("/api/ai/coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: content,
+          context: {
+            goalTitle: activeGoal?.title || "Focus Mission",
+            currentLevel: activeGoal?.currentLevel || "intermediate",
+            streakDays: userProfile.streakDays,
+            weakAreas: activeGoal?.weakAreas || ["Recursion & Backtracking"],
+            strongAreas: activeGoal?.strongAreas || ["Arrays & Two Pointers"],
+            targetDailyMinutes: activeGoal?.dailyMinutesTarget || 60,
+            coachPersona: userProfile.coachPersona || "supportive",
+          },
+        }),
+      });
 
-      if (lower.includes("30 min") || lower.includes("time") || lower.includes("short on time")) {
-        reply = `No problem! When time is tight, high-intensity focus wins over skipping. Here is your **30-Minute Sprint Plan**:\n1. ⚡ **15m**: Solve *Container With Most Water* (focus only on the two-pointer condition ` + "`height[left] < height[right]`" + `).\n2. 📝 **15m**: Review the edge cases in your notes.\n\nI've temporarily deprioritized the remaining tasks so your streak remains safe!`;
-      } else if (lower.includes("recursion") || lower.includes("stuck") || lower.includes("explain")) {
-        reply = `Here is the golden mental model for **Recursion**:\n\n1. **Base Case**: When does the problem become trivial? (e.g. ` + "`if (root == null) return 0;`" + `)\n2. **Hypothesis**: Assume your recursive call ` + "`solve(n-1)`" + ` works flawlessly.\n3. **Induction Step**: Connect the result of ` + "`solve(n-1)`" + ` with the current element ` + "`n`" + `.\n\nWould you like a visual step-by-step walkthrough on a sample problem?`;
-      } else if (lower.includes("reschedule") || lower.includes("missed") || lower.includes("kal")) {
-        reply = `I've analyzed your schedule! Missing a day is completely normal. Instead of piling on double work tomorrow, I've split the missed tasks across the next 3 days (+15 min each). This keeps your daily target manageable at **${activeGoal?.dailyMinutesTarget || 60}m** without burnout.`;
-      } else {
-        reply = `I hear you! In our **${activeGoal?.title || "Goal"}** roadmap, your current strength is in foundational concepts. Let's focus on executing today's mission with high focus. If you need me to break down any concept or rebalance your weekly target, just let me know!`;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) {
+          const coachMsg: ChatMessage = {
+            id: `msg-${Date.now() + 1}`,
+            sender: "coach",
+            content: data.reply,
+            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            contextTag: customTag || `${activeGoal?.title || "Coach"} • Active Session`,
+          };
+          setChatMessages((prev) => [...prev, coachMsg]);
+          return;
+        }
       }
+    } catch (e) {
+      console.warn("API coach fetch failed, falling back to local heuristic", e);
+    }
 
-      const coachMsg: ChatMessage = {
-        id: `msg-${Date.now() + 1}`,
-        sender: "coach",
-        content: reply,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        contextTag: customTag || `${activeGoal?.title || "Coach"} • Active Session`,
-      };
+    // Heuristic fallback customized by persona
+    let reply = `In our **${activeGoal?.title || "Goal"}** roadmap, your consistency is solid. Let's focus on executing today's mission with high focus!`;
+    const lower = content.toLowerCase();
 
-      setChatMessages((prev) => [...prev, coachMsg]);
-    }, 700);
+    if (userProfile.coachPersona === "tough_love") {
+      reply = `Focus is a muscle. Stop scrolling, pick today's top task for **${activeGoal?.title || "Goal"}**, and give it 100% intensity for the next 25 minutes. No excuses!`;
+    } else if (userProfile.coachPersona === "analytical") {
+      reply = `Based on your telemetry, cognitive efficiency peaks during uninterrupted 45-minute blocks. Today's task density is optimized for your target of **${activeGoal?.dailyMinutesTarget || 60} minutes**.`;
+    } else if (userProfile.coachPersona === "socratic") {
+      reply = `Before diving into today's mission: What is the single core concept in **${activeGoal?.title || "Goal"}** that feels most ambiguous right now? Let's unpack it first.`;
+    }
+
+    if (lower.includes("30 min") || lower.includes("time") || lower.includes("short on time")) {
+      reply = `No problem! When time is tight, high-intensity focus wins over skipping. Here is your **30-Minute Sprint Plan**:\n1. ⚡ **15m**: Solve one core pattern problem.\n2. 📝 **15m**: Review key takeaways in your notes.\n\nI've deprioritized secondary tasks so your streak remains safe!`;
+    } else if (lower.includes("recursion") || lower.includes("stuck") || lower.includes("explain")) {
+      reply = `Here is the golden mental model for **Recursion**:\n\n1. **Base Case**: When does the problem become trivial? (e.g. \`if (root == null) return 0;\`)\n2. **Hypothesis**: Assume your recursive call \`solve(n-1)\` works flawlessly.\n3. **Induction Step**: Connect the result of \`solve(n-1)\` with the current element \`n\`.\n\nWould you like a step-by-step walkthrough?`;
+    }
+
+    const coachMsg: ChatMessage = {
+      id: `msg-${Date.now() + 1}`,
+      sender: "coach",
+      content: reply,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      contextTag: customTag || `${activeGoal?.title || "Coach"} • Active Session`,
+    };
+
+    setChatMessages((prev) => [...prev, coachMsg]);
   };
 
   return (
@@ -337,6 +388,8 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activeGoal,
         setActiveGoalId,
         userProfile,
+        updateUserProfile,
+        updateActiveGoal,
         todayTasks,
         toggleTaskStatus,
         checkIns,

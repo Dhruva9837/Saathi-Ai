@@ -30,6 +30,8 @@ interface CoachState {
 
   // Actions
   setActiveGoalId: (id: string) => void;
+  updateUserProfile: (profileUpdates: Partial<UserProfile>) => void;
+  updateActiveGoal: (goalUpdates: Partial<Goal>) => void;
   toggleTaskStatus: (taskId: string) => void;
   submitCheckIn: (checkInData: Omit<CheckIn, "id" | "date" | "goalId">) => AdaptivePlanProposal;
   acceptAdaptiveProposal: (proposalId: string) => void;
@@ -54,6 +56,19 @@ export const useCoachStore = create<CoachState>()(
       isCheckInModalOpen: false,
 
       setActiveGoalId: (id: string) => set({ activeGoalId: id }),
+
+      updateUserProfile: (profileUpdates: Partial<UserProfile>) =>
+        set((state) => ({ userProfile: { ...state.userProfile, ...profileUpdates } })),
+
+      updateActiveGoal: (goalUpdates: Partial<Goal>) => {
+        const activeGoal = get().getActiveGoal();
+        if (!activeGoal) return;
+        set((state) => ({
+          goals: state.goals.map((g) =>
+            g.id === activeGoal.id ? { ...g, ...goalUpdates } : g
+          ),
+        }));
+      },
 
       setIsCheckInModalOpen: (open: boolean) => set({ isCheckInModalOpen: open }),
 
@@ -286,6 +301,7 @@ export const useCoachStore = create<CoachState>()(
                 weakAreas: activeGoal?.weakAreas || ["Recursion & Backtracking"],
                 strongAreas: activeGoal?.strongAreas || ["Arrays & Two Pointers"],
                 targetDailyMinutes: activeGoal?.dailyMinutesTarget || 60,
+                coachPersona: get().userProfile.coachPersona || "supportive",
               },
             }),
           });

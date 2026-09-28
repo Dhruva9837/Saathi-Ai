@@ -8,6 +8,10 @@ export const initialUserProfile: UserProfile = {
   totalXp: 850,
   level: 7,
   joinedDate: "2026-08-01",
+  coachPersona: "supportive",
+  adaptationSensitivity: "balanced",
+  dailyReminders: true,
+  soundEffects: true,
 };
 
 export const initialGoals: Goal[] = [

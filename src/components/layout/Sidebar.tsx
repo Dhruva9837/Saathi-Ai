@@ -9,6 +9,7 @@ import {
   BotMessageSquare,
   BarChart3,
   CalendarCheck2,
+  Settings,
   Compass,
   PlusCircle,
   Sparkles,
@@ -44,6 +45,11 @@ export const Sidebar: React.FC = () => {
       name: "Weekly Review",
       href: "/dashboard/review",
       icon: CalendarCheck2,
+    },
+    {
+      name: "Settings & Persona",
+      href: "/dashboard/settings",
+      icon: Settings,
     },
   ];
 

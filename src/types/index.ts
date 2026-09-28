@@ -103,6 +103,9 @@ export interface ChatMessage {
   contextTag?: string;
 }
 
+export type CoachPersona = 'supportive' | 'tough_love' | 'analytical' | 'socratic';
+export type AdaptationSensitivity = 'conservative' | 'balanced' | 'aggressive';
+
 export interface UserProfile {
   name: string;
   email: string;
@@ -111,4 +114,8 @@ export interface UserProfile {
   totalXp: number;
   level: number;
   joinedDate: string;
+  coachPersona?: CoachPersona;
+  adaptationSensitivity?: AdaptationSensitivity;
+  dailyReminders?: boolean;
+  soundEffects?: boolean;
 }
