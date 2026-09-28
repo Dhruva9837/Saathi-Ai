@@ -55,20 +55,43 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [weeklyReview, setWeeklyReview] = useState<WeeklyReview>(initialWeeklyReview);
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState<boolean>(false);
 
-  // Load persisted state if in browser
+  // Load persisted state if in browser with versioned key to discard stale dummy caches
   useEffect(() => {
     try {
-      const savedGoals = localStorage.getItem("saathi_goals");
-      if (savedGoals) setGoals(JSON.parse(savedGoals));
+      const savedGoals = localStorage.getItem("saathi_v2_goals");
+      if (savedGoals) {
+        setGoals(JSON.parse(savedGoals));
+      } else {
+        localStorage.removeItem("saathi_goals");
+      }
 
-      const savedActiveGoalId = localStorage.getItem("saathi_active_goal_id");
-      if (savedActiveGoalId) setActiveGoalId(savedActiveGoalId);
+      const savedActiveGoalId = localStorage.getItem("saathi_v2_active_goal_id");
+      if (savedActiveGoalId) {
+        setActiveGoalId(savedActiveGoalId);
+      } else {
+        localStorage.removeItem("saathi_active_goal_id");
+      }
 
-      const savedProfile = localStorage.getItem("saathi_profile");
-      if (savedProfile) setUserProfile(JSON.parse(savedProfile));
+      const savedProfile = localStorage.getItem("saathi_v2_profile");
+      if (savedProfile) {
+        const parsed = JSON.parse(savedProfile);
+        // Sanitize legacy mock values if present
+        if (parsed.streakDays === 7 && parsed.totalXp === 850) {
+          setUserProfile(initialUserProfile);
+        } else {
+          setUserProfile(parsed);
+        }
+      } else {
+        localStorage.removeItem("saathi_profile");
+        setUserProfile(initialUserProfile);
+      }
 
-      const savedMessages = localStorage.getItem("saathi_messages");
-      if (savedMessages) setChatMessages(JSON.parse(savedMessages));
+      const savedMessages = localStorage.getItem("saathi_v2_messages");
+      if (savedMessages) {
+        setChatMessages(JSON.parse(savedMessages));
+      } else {
+        localStorage.removeItem("saathi_messages");
+      }
     } catch (e) {
       console.error("Failed to load state from localStorage", e);
     }
@@ -77,10 +100,10 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Sync to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem("saathi_goals", JSON.stringify(goals));
-      localStorage.setItem("saathi_active_goal_id", activeGoalId);
-      localStorage.setItem("saathi_profile", JSON.stringify(userProfile));
-      localStorage.setItem("saathi_messages", JSON.stringify(chatMessages));
+      localStorage.setItem("saathi_v2_goals", JSON.stringify(goals));
+      localStorage.setItem("saathi_v2_active_goal_id", activeGoalId);
+      localStorage.setItem("saathi_v2_profile", JSON.stringify(userProfile));
+      localStorage.setItem("saathi_v2_messages", JSON.stringify(chatMessages));
     } catch (e) {
       console.error("Failed to save state", e);
     }

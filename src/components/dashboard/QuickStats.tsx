@@ -75,15 +75,21 @@ export const QuickStats: React.FC = () => {
         </div>
         <div className="my-2.5">
           <div className="text-2xl sm:text-3xl font-bold text-[#F59E0B] font-mono flex items-center gap-1.5">
-            {userProfile.streakDays} <span className="text-xs text-[#94A3B8] font-sans font-normal">Days</span>
+            {userProfile.streakDays || 1} <span className="text-xs text-[#94A3B8] font-sans font-normal">Day{(userProfile.streakDays || 1) === 1 ? "" : "s"}</span>
           </div>
           <div className="text-[11px] text-[#22C55E] flex items-center gap-1 mt-1 font-medium">
             <TrendingUp className="h-3 w-3" />
-            Top 5% Consistency
+            {(userProfile.streakDays || 1) > 3
+              ? "Top 5% Consistency"
+              : (userProfile.streakDays || 1) > 1
+              ? "Streak Momentum Active"
+              : "Day 1 of Journey"}
           </div>
         </div>
         <div className="text-[10px] text-[#94A3B8]">
-          Daily goal met consecutively
+          {(userProfile.streakDays || 1) > 1
+            ? "Daily goal met consecutively"
+            : "Complete today's tasks to build streak"}
         </div>
       </motion.div>
 
@@ -121,14 +127,14 @@ export const QuickStats: React.FC = () => {
         <div className="my-2 space-y-1">
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-[#94A3B8]">Focus Area:</span>
-            <span className="font-semibold text-[#EF4444] truncate max-w-[110px]">
-              {activeGoal?.weakAreas[0] || "Recursion"}
+            <span className="font-semibold text-[#EF4444] truncate max-w-[110px]" title={activeGoal?.weakAreas?.[0] || activeGoal?.milestones[0]?.title || "Core Fundamentals"}>
+              {activeGoal?.weakAreas?.[0] || activeGoal?.milestones[0]?.title?.split(" ")[0] || "Foundations"}
             </span>
           </div>
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-[#94A3B8]">Strong Area:</span>
-            <span className="font-semibold text-[#22C55E] truncate max-w-[110px]">
-              {activeGoal?.strongAreas[0] || "Arrays"}
+            <span className="font-semibold text-[#22C55E] truncate max-w-[110px]" title={activeGoal?.strongAreas?.[0] || "Core Concepts"}>
+              {activeGoal?.strongAreas?.[0] || "Problem Solving"}
             </span>
           </div>
         </div>

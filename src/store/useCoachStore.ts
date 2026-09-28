@@ -342,7 +342,7 @@ export const useCoachStore = create<CoachState>()(
       },
     }),
     {
-      name: "saathi-coach-store",
+      name: "saathi-coach-store-v2",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         goals: state.goals,
