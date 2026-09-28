@@ -9,6 +9,7 @@ import {
   BotMessageSquare,
   BarChart3,
   CalendarCheck2,
+  Timer,
   Settings,
   Compass,
   PlusCircle,
@@ -24,6 +25,12 @@ export const Sidebar: React.FC = () => {
       href: "/dashboard",
       icon: LayoutDashboard,
       badge: "Today",
+    },
+    {
+      name: "Focus Room",
+      href: "/dashboard/focus",
+      icon: Timer,
+      badge: "Zen",
     },
     {
       name: "Roadmap",
