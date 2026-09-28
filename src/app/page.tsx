@@ -14,10 +14,13 @@ import {
   Zap,
   BarChart3,
   Play,
+  LogIn,
 } from "lucide-react";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export default function LandingPage() {
   const [simScenario, setSimScenario] = useState<"under" | "over" | "struggling">("under");
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#0B1120] text-[#F8FAFC]">
@@ -46,12 +49,13 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#151E2E] transition-colors"
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#151E2E] transition-colors"
             >
-              Dashboard
-            </Link>
+              <LogIn className="h-3.5 w-3.5" />
+              <span>Sign In</span>
+            </button>
             <Link
               href="/onboarding"
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-semibold shadow-sm transition-colors"
@@ -399,12 +403,12 @@ export default function LandingPage() {
             >
               Start Free Coaching
             </Link>
-            <Link
-              href="/dashboard"
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
               className="px-6 py-2.5 rounded-lg bg-[#0B1120] border border-[#1E293B] hover:border-[#334155] text-[#F8FAFC] text-xs font-semibold transition-colors"
             >
-              Open Dashboard
-            </Link>
+              Sign In to Account
+            </button>
           </div>
         </div>
       </section>
@@ -420,6 +424,15 @@ export default function LandingPage() {
           <div>Built for ambitious learners, developers, and students.</div>
         </div>
       </footer>
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => {
+          window.location.href = "/dashboard";
+        }}
+      />
     </div>
   );
 }
