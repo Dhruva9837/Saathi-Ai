@@ -77,6 +77,28 @@ export const WeeklyReviewView: React.FC = () => {
     }
   };
 
+  const totalGoalTasks =
+    activeGoal?.milestones.reduce((acc, m) => acc + m.tasks.length, 0) || 0;
+  const completedGoalTasks =
+    activeGoal?.milestones.reduce(
+      (acc, m) => acc + m.tasks.filter((t) => t.status === "completed").length,
+      0
+    ) || 0;
+  const hitRate =
+    totalGoalTasks > 0 ? Math.round((completedGoalTasks / totalGoalTasks) * 100) : 0;
+  const totalCompletedMinutes =
+    activeGoal?.milestones.reduce(
+      (acc, m) =>
+        acc +
+        m.tasks
+          .filter((t) => t.status === "completed")
+          .reduce((sum, t) => sum + (t.actualMinutes || t.estimatedMinutes), 0),
+      0
+    ) || 0;
+  const totalHours = (totalCompletedMinutes / 60).toFixed(1);
+  const topStrength = activeGoal?.strongAreas[0] || "Foundations";
+  const targetWeakness = activeGoal?.weakAreas[0] || "Active Practice";
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -90,7 +112,7 @@ export const WeeklyReviewView: React.FC = () => {
               <span className="text-[#94A3B8] text-xs">• Weekly AI Review</span>
             </div>
             <h2 className="text-xl font-extrabold text-[#F8FAFC]">
-              Week {weeklyReview.weekStartDate} — {weeklyReview.weekEndDate}
+              {activeGoal?.title || "Mastery Track"} Retrospective
             </h2>
             <p className="text-xs text-[#94A3B8] mt-1">
               Goal Focus: <span className="text-[#818CF8] font-medium">{activeGoal?.title}</span>
@@ -100,7 +122,7 @@ export const WeeklyReviewView: React.FC = () => {
           <div className="flex items-center gap-3">
             <span className="px-3.5 py-2 rounded-xl bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] text-xs font-bold flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
-              <span>{weeklyReview.consistencyScorePercent}% Consistency</span>
+              <span>{hitRate}% Completion</span>
             </span>
 
             <button
@@ -126,43 +148,43 @@ export const WeeklyReviewView: React.FC = () => {
 
       {/* Top 4 Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl glass-panel border border-surfaceBorder bg-surface/70">
-          <div className="text-xs text-slate-400 font-medium mb-1">Tasks Completed</div>
-          <div className="text-2xl font-bold text-white font-mono">
-            {weeklyReview.tasksCompleted}/{weeklyReview.tasksTotal}
+        <div className="p-4 rounded-xl border border-[#1E293B] bg-[#151E2E]">
+          <div className="text-xs text-[#94A3B8] font-medium mb-1">Tasks Completed</div>
+          <div className="text-2xl font-bold text-[#F8FAFC] font-mono">
+            {completedGoalTasks}/{totalGoalTasks}
           </div>
-          <div className="text-[10px] text-accent-emerald mt-1 font-semibold">
-            {weeklyReview.completionRatePercent}% Hit Rate
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl glass-panel border border-surfaceBorder bg-surface/70">
-          <div className="text-xs text-slate-400 font-medium mb-1">Time Invested</div>
-          <div className="text-2xl font-bold text-accent-cyan font-mono">
-            {weeklyReview.totalHoursSpent} hrs
-          </div>
-          <div className="text-[10px] text-slate-400 mt-1">
-            Across 7 active days
+          <div className="text-[10px] text-[#22C55E] mt-1 font-semibold">
+            {hitRate}% Hit Rate
           </div>
         </div>
 
-        <div className="p-4 rounded-xl glass-panel border border-surfaceBorder bg-surface/70">
-          <div className="text-xs text-slate-400 font-medium mb-1">Top Strength</div>
-          <div className="text-lg font-bold text-accent-emerald truncate">
-            {weeklyReview.strongAreas[0]}
+        <div className="p-4 rounded-xl border border-[#1E293B] bg-[#151E2E]">
+          <div className="text-xs text-[#94A3B8] font-medium mb-1">Time Invested</div>
+          <div className="text-2xl font-bold text-[#818CF8] font-mono">
+            {totalHours} hrs
           </div>
-          <div className="text-[10px] text-slate-400 mt-1">
-            Mastery achieved
+          <div className="text-[10px] text-[#94A3B8] mt-1">
+            Across active sessions
           </div>
         </div>
 
-        <div className="p-4 rounded-xl glass-panel border border-surfaceBorder bg-surface/70">
-          <div className="text-xs text-slate-400 font-medium mb-1">Target Weakness</div>
-          <div className="text-lg font-bold text-rose-400 truncate">
-            {weeklyReview.weakAreas[0]}
+        <div className="p-4 rounded-xl border border-[#1E293B] bg-[#151E2E]">
+          <div className="text-xs text-[#94A3B8] font-medium mb-1">Top Strength</div>
+          <div className="text-lg font-bold text-[#22C55E] truncate">
+            {topStrength}
           </div>
-          <div className="text-[10px] text-rose-300/80 mt-1">
-            Scaffolded for next week
+          <div className="text-[10px] text-[#94A3B8] mt-1">
+            High confidence
+          </div>
+        </div>
+
+        <div className="p-4 rounded-xl border border-[#1E293B] bg-[#151E2E]">
+          <div className="text-xs text-[#94A3B8] font-medium mb-1">Target Weakness</div>
+          <div className="text-lg font-bold text-[#EF4444] truncate">
+            {targetWeakness}
+          </div>
+          <div className="text-[10px] text-[#EF4444]/80 mt-1">
+            Targeted for drills
           </div>
         </div>
       </div>

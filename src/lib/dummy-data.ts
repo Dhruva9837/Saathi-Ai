@@ -1,13 +1,13 @@
 import { Goal, UserProfile, WeeklyReview, ChatMessage } from "@/types";
 
 export const initialUserProfile: UserProfile = {
-  name: "Dhruva",
-  email: "dhruva@example.com",
-  avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-  streakDays: 7,
-  totalXp: 850,
-  level: 7,
-  joinedDate: "2026-08-01",
+  name: "Learner",
+  email: "user@example.com",
+  avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=SaathiLearner",
+  streakDays: 1,
+  totalXp: 0,
+  level: 1,
+  joinedDate: new Date().toISOString().split("T")[0],
   coachPersona: "supportive",
   adaptationSensitivity: "balanced",
   dailyReminders: true,
