@@ -1,13 +1,9 @@
 -- ==========================================
 -- STEP 1: CORE TABLES & ROW LEVEL SECURITY (RLS)
--- Paste and run this in Supabase SQL Editor first
 -- ==========================================
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- 1. PROFILES (Extends Supabase Auth users)
-CREATE TABLE IF NOT EXISTS profiles (
+-- 1. PROFILES
+CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL DEFAULT 'Learner',
     email TEXT,
@@ -24,9 +20,9 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 
 -- 2. GOALS
-CREATE TABLE IF NOT EXISTS goals (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.goals (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     description TEXT,
     deadline DATE NOT NULL,
@@ -42,9 +38,9 @@ CREATE TABLE IF NOT EXISTS goals (
 );
 
 -- 3. MILESTONES
-CREATE TABLE IF NOT EXISTS milestones (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    goal_id UUID NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.milestones (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    goal_id UUID NOT NULL REFERENCES public.goals(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     description TEXT,
     order_index INT NOT NULL,
@@ -54,10 +50,10 @@ CREATE TABLE IF NOT EXISTS milestones (
 );
 
 -- 4. TASKS
-CREATE TABLE IF NOT EXISTS tasks (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    goal_id UUID NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
-    milestone_id UUID NOT NULL REFERENCES milestones(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    goal_id UUID NOT NULL REFERENCES public.goals(id) ON DELETE CASCADE,
+    milestone_id UUID NOT NULL REFERENCES public.milestones(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     description TEXT,
     difficulty TEXT NOT NULL CHECK (difficulty IN ('easy', 'medium', 'hard')),
@@ -74,11 +70,11 @@ CREATE TABLE IF NOT EXISTS tasks (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 5. DAILY CHECK-INS
-CREATE TABLE IF NOT EXISTS checkins (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    goal_id UUID NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
+-- 5. CHECKINS
+CREATE TABLE IF NOT EXISTS public.checkins (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    goal_id UUID NOT NULL REFERENCES public.goals(id) ON DELETE CASCADE,
     checkin_date DATE NOT NULL DEFAULT CURRENT_DATE,
     completed_task_ids UUID[] DEFAULT '{}',
     actual_minutes_spent INT NOT NULL DEFAULT 0,
@@ -92,10 +88,10 @@ CREATE TABLE IF NOT EXISTS checkins (
 );
 
 -- 6. AI INSIGHTS
-CREATE TABLE IF NOT EXISTS ai_insights (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    goal_id UUID NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.ai_insights (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    goal_id UUID NOT NULL REFERENCES public.goals(id) ON DELETE CASCADE,
     insight_type TEXT NOT NULL,
     trigger_reason TEXT,
     previous_daily_target_minutes INT,
@@ -107,37 +103,20 @@ CREATE TABLE IF NOT EXISTS ai_insights (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_goals_user_id ON goals(user_id);
-CREATE INDEX IF NOT EXISTS idx_milestones_goal_id ON milestones(goal_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_goal_id ON tasks(goal_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_milestone_id ON tasks(milestone_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
-CREATE INDEX IF NOT EXISTS idx_checkins_goal_date ON checkins(goal_id, checkin_date);
+-- 7. ROW LEVEL SECURITY (RLS)
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.goals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.milestones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.checkins ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_insights ENABLE ROW LEVEL SECURITY;
 
--- Enable RLS
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
-ALTER TABLE milestones ENABLE ROW LEVEL SECURITY;
-ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE checkins ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ai_insights ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow individual read" ON public.profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Allow individual update" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Allow individual insert" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Policies
-DROP POLICY IF EXISTS "Users can view and update their own profile" ON profiles;
-CREATE POLICY "Users can view and update their own profile" ON profiles FOR ALL USING (auth.uid() = id);
-
-DROP POLICY IF EXISTS "Users can manage their own goals" ON goals;
-CREATE POLICY "Users can manage their own goals" ON goals FOR ALL USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "Users can manage milestones of their goals" ON milestones;
-CREATE POLICY "Users can manage milestones of their goals" ON milestones FOR ALL USING (EXISTS (SELECT 1 FROM goals WHERE goals.id = milestones.goal_id AND goals.user_id = auth.uid()));
-
-DROP POLICY IF EXISTS "Users can manage tasks of their goals" ON tasks;
-CREATE POLICY "Users can manage tasks of their goals" ON tasks FOR ALL USING (EXISTS (SELECT 1 FROM goals WHERE goals.id = tasks.goal_id AND goals.user_id = auth.uid()));
-
-DROP POLICY IF EXISTS "Users can manage their checkins" ON checkins;
-CREATE POLICY "Users can manage their checkins" ON checkins FOR ALL USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "Users can manage their ai insights" ON ai_insights;
-CREATE POLICY "Users can manage their ai insights" ON ai_insights FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Allow goal access" ON public.goals FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Allow milestone access" ON public.milestones FOR ALL USING (EXISTS (SELECT 1 FROM public.goals WHERE public.goals.id = milestones.goal_id AND public.goals.user_id = auth.uid()));
+CREATE POLICY "Allow task access" ON public.tasks FOR ALL USING (EXISTS (SELECT 1 FROM public.goals WHERE public.goals.id = tasks.goal_id AND public.goals.user_id = auth.uid()));
+CREATE POLICY "Allow checkin access" ON public.checkins FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Allow ai insight access" ON public.ai_insights FOR ALL USING (auth.uid() = user_id);
