@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS profiles (
     streak_days INT NOT NULL DEFAULT 1,
     total_xp INT NOT NULL DEFAULT 0,
     level INT NOT NULL DEFAULT 1,
+    coach_persona TEXT NOT NULL DEFAULT 'supportive',
+    adaptation_sensitivity TEXT NOT NULL DEFAULT 'balanced',
+    daily_reminders BOOLEAN NOT NULL DEFAULT TRUE,
+    sound_effects BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
