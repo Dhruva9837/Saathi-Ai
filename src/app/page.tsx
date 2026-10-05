@@ -60,7 +60,7 @@ export default function LandingPage() {
       {/* Navigation Header */}
       <header className="sticky top-0 z-50 w-full border-b border-[rgba(255,255,255,0.07)] bg-[#0A0B14]/85 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Logo href="/" size="sm" showBadge={true} subtitle="AI Coach" />
+          <Logo href="/" size="sm" subtitle="AI Coach" />
 
           <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-[#8B90A8]">
             <a href="#how-it-works" className="hover:text-[#F2F3F8] transition-colors">
@@ -575,7 +575,7 @@ export default function LandingPage() {
       <footer className="border-t border-[rgba(255,255,255,0.07)] py-8 text-center text-xs text-[#8B90A8]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Logo size="sm" showBadge={false} subtitle={null} />
+            <Logo size="sm" subtitle={null} />
             <span className="text-[#8B90A8] hidden sm:inline">• Adaptive Productivity & Goal Coach</span>
           </div>
           <div>Built for ambitious learners, developers, and knowledge workers.</div>

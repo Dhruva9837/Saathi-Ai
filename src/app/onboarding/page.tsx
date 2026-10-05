@@ -187,7 +187,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-background bg-radial-gradient text-slate-100 flex flex-col justify-between p-4 sm:p-8">
       {/* Top Header */}
       <div className="max-w-4xl mx-auto w-full flex items-center justify-between py-4">
-        <Logo href="/" size="sm" showBadge={false} subtitle="Setup" />
+        <Logo href="/" size="sm" subtitle="Setup" />
         <div className="text-xs text-[#8B90A8]">
           Step <span className="text-[#7C6CFF] font-bold">{step}</span> of 4
         </div>

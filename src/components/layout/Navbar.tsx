@@ -61,7 +61,7 @@ export const Navbar: React.FC = () => {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Brand Logo & App Name */}
           <div className="flex items-center gap-6">
-            <Logo href="/" size="sm" showBadge={false} subtitle="AI Coach" />
+            <Logo href="/" size="sm" subtitle="AI Coach" />
 
             {/* Goal Switcher Dropdown */}
             {activeGoal && (

@@ -6,7 +6,6 @@ import Link from "next/link";
 interface LogoProps {
   size?: "sm" | "md" | "lg" | "xl";
   showText?: boolean;
-  showBadge?: boolean;
   subtitle?: string | null;
   href?: string;
   className?: string;
@@ -172,7 +171,6 @@ export function LogoIcon({
 export function Logo({
   size = "md",
   showText = true,
-  showBadge = true,
   subtitle = "AI Coach",
   href,
   className = "",
@@ -207,11 +205,6 @@ export function Logo({
             >
               AI
             </span>
-            {showBadge && (
-              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[#7C6CFF]/15 border border-[#7C6CFF]/30 text-[#7C6CFF] tracking-wide ml-0.5">
-                PRO
-              </span>
-            )}
           </div>
           {subtitle && (
             <span
