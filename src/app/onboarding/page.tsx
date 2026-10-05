@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useCoach } from "@/context/CoachContext";
 import { createGoalWithMilestonesAction } from "@/server/actions/goals";
 import {
-  BrainCircuit,
   Sparkles,
   ArrowRight,
   ArrowLeft,
@@ -18,6 +17,7 @@ import {
   Check,
   RefreshCw,
 } from "lucide-react";
+import { Logo, LogoIcon } from "@/components/brand/Logo";
 import { GoalLevel, SchedulePreference } from "@/types";
 
 export default function OnboardingPage() {
@@ -187,16 +187,9 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-background bg-radial-gradient text-slate-100 flex flex-col justify-between p-4 sm:p-8">
       {/* Top Header */}
       <div className="max-w-4xl mx-auto w-full flex items-center justify-between py-4">
-        <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-primary-600 to-accent-cyan flex items-center justify-center text-white shadow-lg shadow-primary-500/20">
-            <BrainCircuit className="h-5 w-5" />
-          </div>
-          <span className="font-heading font-bold text-lg text-white">
-            Saathi <span className="text-gradient-brand">AI</span>
-          </span>
-        </div>
-        <div className="text-xs text-slate-400">
-          Step <span className="text-primary-400 font-bold">{step}</span> of 4
+        <Logo href="/" size="sm" showBadge={false} subtitle="Setup" />
+        <div className="text-xs text-[#8B90A8]">
+          Step <span className="text-[#7C6CFF] font-bold">{step}</span> of 4
         </div>
       </div>
 
@@ -460,8 +453,8 @@ export default function OnboardingPage() {
               ) : (
                 /* AI Generation Loading Animation */
                 <div className="py-8 space-y-6 text-center animate-in fade-in">
-                  <div className="relative mx-auto h-16 w-16 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-primary-600 to-accent-cyan text-white shadow-xl shadow-primary-500/30 animate-pulse">
-                    <BrainCircuit className="h-8 w-8" />
+                  <div className="relative mx-auto flex items-center justify-center animate-pulse">
+                    <LogoIcon size={56} />
                   </div>
 
                   <div>

@@ -1,6 +1,6 @@
 /**
  * Generic LLM Caller for Saathi AI
- * Supports Google Gemini API and OpenAI API with automatic fallback to heuristics.
+ * Supports Google Gemini API (1.5 Flash / 2.0 Flash) and OpenAI API with automatic fallback.
  */
 
 export interface LLMRequestOptions {
@@ -19,35 +19,30 @@ export async function callLLM({
   const geminiKey = process.env.GEMINI_API_KEY;
   const openaiKey = process.env.OPENAI_API_KEY;
 
-  // 1. Try Gemini API first if configured
-  if (geminiKey && geminiKey !== "your-gemini-api-key") {
+  // 1. Try Gemini API first if configured with valid API key
+  if (geminiKey && geminiKey.startsWith("AIzaSy")) {
     try {
       const model = "gemini-1.5-flash";
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
 
-      const contents: any[] = [];
-      if (systemPrompt) {
-        contents.push({
-          role: "user",
-          parts: [{ text: `SYSTEM INSTRUCTIONS:\n${systemPrompt}` }],
-        });
-        contents.push({
-          role: "model",
-          parts: [{ text: "Understood. I will follow all instructions and tone." }],
-        });
-      }
-      contents.push({
-        role: "user",
-        parts: [{ text: userPrompt }],
-      });
-
       const body: any = {
-        contents,
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: userPrompt }],
+          },
+        ],
         generationConfig: {
           temperature,
           ...(responseFormatJson ? { responseMimeType: "application/json" } : {}),
         },
       };
+
+      if (systemPrompt) {
+        body.system_instruction = {
+          parts: [{ text: systemPrompt }],
+        };
+      }
 
       const res = await fetch(url, {
         method: "POST",
@@ -66,7 +61,7 @@ export async function callLLM({
   }
 
   // 2. Try OpenAI API if configured
-  if (openaiKey && openaiKey !== "your-openai-api-key") {
+  if (openaiKey && openaiKey.startsWith("sk-")) {
     try {
       const messages: any[] = [];
       if (systemPrompt) {
@@ -98,6 +93,6 @@ export async function callLLM({
     }
   }
 
-  // Return null if no LLM key is configured or both calls failed
+  // Return null if no LLM key is configured or API calls failed
   return null;
 }

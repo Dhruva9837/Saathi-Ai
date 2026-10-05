@@ -49,7 +49,6 @@ export const FocusRoomView: React.FC = () => {
 
   const totalDuration = TIMER_PRESETS[mode].minutes * 60;
   const progressRatio = (totalDuration - secondsLeft) / totalDuration;
-  const strokeDashoffset = 100 - progressRatio * 100;
 
   // Countdown timer interval
   useEffect(() => {
@@ -88,7 +87,7 @@ export const FocusRoomView: React.FC = () => {
           particleCount: 70,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ["#6366F1", "#38BDF8", "#10B981"],
+          colors: ["#7C6CFF", "#4F8BFF", "#3DDC97"],
         });
       } catch (e) {}
     }
@@ -155,33 +154,33 @@ export const FocusRoomView: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      className={`relative rounded-2xl border border-[#1E293B] bg-gradient-to-b from-[#0B1120] via-[#151E2E] to-[#0B1120] p-6 sm:p-10 transition-all ${
+      className={`relative rounded-2xl border border-[rgba(255,255,255,0.07)] bg-gradient-to-b from-[#0A0B14] via-[#11131F] to-[#0A0B14] p-6 sm:p-10 transition-all shadow-xl ${
         isFullscreen ? "h-screen w-screen flex flex-col justify-between overflow-y-auto" : "min-h-[75vh]"
       }`}
     >
       {/* Top Controls */}
-      <div className="flex items-center justify-between gap-4 border-b border-[#1E293B]/60 pb-5">
+      <div className="flex items-center justify-between gap-4 border-b border-[rgba(255,255,255,0.07)] pb-5">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[#6366F1] to-[#818CF8] flex items-center justify-center text-white shadow-md shadow-[#6366F1]/20">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[#7C6CFF] to-[#4F8BFF] flex items-center justify-center text-white shadow-md shadow-[#7C6CFF]/20">
             <Zap className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-[#F8FAFC]">Ambient Focus Room</h2>
-            <p className="text-xs text-[#94A3B8]">
+            <h2 className="text-sm font-bold text-[#F2F3F8]">Ambient Focus Room</h2>
+            <p className="text-xs text-[#8B90A8]">
               {completedSessions} focus sprints completed today
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0B1120] border border-[#1E293B] text-xs text-[#F59E0B] font-semibold">
-            <Flame className="h-3.5 w-3.5 fill-[#F59E0B]" />
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#11131F] border border-[rgba(255,255,255,0.07)] text-xs text-[#F5B544] font-semibold">
+            <Flame className="h-3.5 w-3.5 fill-[#F5B544]" />
             <span>{userProfile.streakDays}d Streak Active</span>
           </div>
 
           <button
             onClick={toggleFullscreen}
-            className="p-2 rounded-xl bg-[#0B1120] border border-[#1E293B] hover:border-[#334155] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
+            className="p-2 rounded-xl bg-[#11131F] border border-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] text-[#8B90A8] hover:text-[#F2F3F8] transition-colors"
             title="Toggle Zen Fullscreen"
           >
             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
@@ -191,7 +190,7 @@ export const FocusRoomView: React.FC = () => {
 
       {/* Mode Switcher Tabs */}
       <div className="flex justify-center my-6">
-        <div className="inline-flex p-1 rounded-2xl bg-[#0B1120] border border-[#1E293B] gap-1 max-w-full overflow-x-auto">
+        <div className="inline-flex p-1 rounded-2xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] gap-1 max-w-full overflow-x-auto">
           {(Object.keys(TIMER_PRESETS) as TimerMode[]).map((key) => {
             const isSelected = mode === key;
             const preset = TIMER_PRESETS[key];
@@ -201,8 +200,8 @@ export const FocusRoomView: React.FC = () => {
                 onClick={() => handleModeChange(key)}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   isSelected
-                    ? "bg-[#6366F1] text-white shadow-md shadow-[#6366F1]/25"
-                    : "text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#151E2E]"
+                    ? "bg-gradient-to-r from-[#7C6CFF] to-[#6352E8] text-white shadow-md shadow-[#7C6CFF]/25"
+                    : "text-[#8B90A8] hover:text-[#F2F3F8] hover:bg-[#171A2B]"
                 }`}
               >
                 {preset.label}
@@ -221,7 +220,7 @@ export const FocusRoomView: React.FC = () => {
               cx="50"
               cy="50"
               r="44"
-              className="stroke-[#1E293B]"
+              className="stroke-[#171A2B]"
               strokeWidth="4"
               fill="transparent"
             />
@@ -229,7 +228,7 @@ export const FocusRoomView: React.FC = () => {
               cx="50"
               cy="50"
               r="44"
-              className="stroke-[#6366F1] transition-all duration-1000 ease-linear"
+              className="stroke-[#7C6CFF] transition-all duration-1000 ease-linear"
               strokeWidth="5"
               strokeDasharray="276.46"
               strokeDashoffset={`${276.46 * (1 - progressRatio)}`}
@@ -240,10 +239,10 @@ export const FocusRoomView: React.FC = () => {
 
           {/* Time & Play Controls */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-4xl sm:text-5xl font-extrabold font-mono text-[#F8FAFC] tracking-tight">
+            <span className="text-4xl sm:text-5xl font-extrabold font-mono text-[#F2F3F8] tracking-tight">
               {formatTime(secondsLeft)}
             </span>
-            <span className="text-xs uppercase tracking-widest text-[#818CF8] font-bold mt-1">
+            <span className="text-xs uppercase tracking-widest text-[#7C6CFF] font-bold mt-1">
               {TIMER_PRESETS[mode].type === "focus" ? "Deep Focus" : "Rest & Recharge"}
             </span>
 
@@ -253,8 +252,8 @@ export const FocusRoomView: React.FC = () => {
                 onClick={() => setIsRunning(!isRunning)}
                 className={`h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all transform active:scale-95 ${
                   isRunning
-                    ? "bg-[#EF4444] hover:bg-[#DC2626] shadow-[#EF4444]/25"
-                    : "bg-[#6366F1] hover:bg-[#4F46E5] shadow-[#6366F1]/30"
+                    ? "bg-[#FF6B7A] hover:opacity-90 shadow-[#FF6B7A]/25"
+                    : "bg-[#7C6CFF] hover:opacity-90 shadow-[#7C6CFF]/30"
                 }`}
               >
                 {isRunning ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5 fill-white" />}
@@ -265,7 +264,7 @@ export const FocusRoomView: React.FC = () => {
                   setIsRunning(false);
                   setSecondsLeft(totalDuration);
                 }}
-                className="h-10 w-10 rounded-xl bg-[#0B1120] border border-[#1E293B] hover:border-[#334155] text-[#94A3B8] hover:text-[#F8FAFC] flex items-center justify-center transition-colors"
+                className="h-10 w-10 rounded-xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] text-[#8B90A8] hover:text-[#F2F3F8] flex items-center justify-center transition-colors"
                 title="Reset Timer"
               >
                 <RotateCcw className="h-4 w-4" />
@@ -277,11 +276,11 @@ export const FocusRoomView: React.FC = () => {
         {/* Task Linker */}
         {uncompletedTasks.length > 0 && TIMER_PRESETS[mode].type === "focus" && (
           <div className="mt-4 flex items-center gap-2 max-w-md w-full px-4">
-            <span className="text-xs text-[#94A3B8] shrink-0 font-medium">Link Task:</span>
+            <span className="text-xs text-[#8B90A8] shrink-0 font-medium">Link Task:</span>
             <select
               value={selectedTaskId}
               onChange={(e) => setSelectedTaskId(e.target.value)}
-              className="flex-1 px-3 py-1.5 rounded-xl bg-[#0B1120] border border-[#1E293B] text-xs text-[#F8FAFC] focus:outline-none focus:border-[#818CF8]"
+              className="flex-1 px-3 py-1.5 rounded-xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-xs text-[#F2F3F8] focus:outline-none focus:border-[#7C6CFF]"
             >
               {uncompletedTasks.map((task) => (
                 <option key={task.id} value={task.id}>
@@ -294,10 +293,10 @@ export const FocusRoomView: React.FC = () => {
       </div>
 
       {/* Ambient Soundscapes Bar */}
-      <div className="mt-8 pt-6 border-t border-[#1E293B]/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="mt-8 pt-6 border-t border-[rgba(255,255,255,0.07)] flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Volume2 className="h-4 w-4 text-[#818CF8]" />
-          <span className="text-xs font-bold text-[#F8FAFC]">Procedural Ambient Soundscapes:</span>
+          <Volume2 className="h-4 w-4 text-[#7C6CFF]" />
+          <span className="text-xs font-bold text-[#F2F3F8]">Procedural Ambient Soundscapes:</span>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2">
@@ -310,8 +309,8 @@ export const FocusRoomView: React.FC = () => {
                 onClick={() => toggleSound(s.id as any)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
                   isPlaying
-                    ? "bg-[#818CF8]/20 border-[#818CF8] text-[#818CF8] shadow-sm shadow-[#818CF8]/20"
-                    : "bg-[#0B1120] border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[#334155]"
+                    ? "bg-[#7C6CFF]/20 border-[#7C6CFF] text-[#7C6CFF] shadow-sm shadow-[#7C6CFF]/20"
+                    : "bg-[#0A0B14] border-[rgba(255,255,255,0.07)] text-[#8B90A8] hover:text-[#F2F3F8] hover:border-[rgba(255,255,255,0.15)]"
                 }`}
               >
                 <Icon className={`h-3.5 w-3.5 ${isPlaying ? "animate-pulse" : ""}`} />
@@ -325,9 +324,9 @@ export const FocusRoomView: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={toggleMute}
-            className="text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
+            className="text-[#8B90A8] hover:text-[#F2F3F8] transition-colors"
           >
-            {isMuted ? <VolumeX className="h-4 w-4 text-[#EF4444]" /> : <Volume2 className="h-4 w-4" />}
+            {isMuted ? <VolumeX className="h-4 w-4 text-[#FF6B7A]" /> : <Volume2 className="h-4 w-4" />}
           </button>
           <input
             type="range"
@@ -336,7 +335,7 @@ export const FocusRoomView: React.FC = () => {
             step="0.05"
             value={isMuted ? 0 : volume}
             onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-            className="w-20 sm:w-24 h-1.5 bg-[#1E293B] rounded-lg appearance-none cursor-pointer accent-[#818CF8]"
+            className="w-20 sm:w-24 h-1.5 bg-[#171A2B] rounded-lg appearance-none cursor-pointer accent-[#7C6CFF]"
           />
         </div>
       </div>

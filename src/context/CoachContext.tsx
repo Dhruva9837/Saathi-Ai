@@ -17,6 +17,8 @@ import {
   initialCoachMessages,
 } from "@/lib/dummy-data";
 import { generateAdaptiveProposal, applyAdaptivePlanToGoal } from "@/lib/adaptive-engine";
+import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import confetti from "canvas-confetti";
 
 interface CoachContextType {
@@ -41,6 +43,7 @@ interface CoachContextType {
   weeklyReview: WeeklyReview;
   isCheckInModalOpen: boolean;
   setIsCheckInModalOpen: (open: boolean) => void;
+  isLoading: boolean;
 }
 
 const CoachContext = createContext<CoachContextType | undefined>(undefined);
@@ -54,46 +57,184 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(initialCoachMessages);
   const [weeklyReview, setWeeklyReview] = useState<WeeklyReview>(initialWeeklyReview);
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Load persisted state if in browser with versioned key to discard stale dummy caches
+  // 1. Initial Load & Auth Listener for Supabase
   useEffect(() => {
+    // First load from localStorage for instant offline rendering
     try {
       const savedGoals = localStorage.getItem("saathi_v2_goals");
       if (savedGoals) {
-        setGoals(JSON.parse(savedGoals));
-      } else {
-        localStorage.removeItem("saathi_goals");
+        const parsedGoals: Goal[] = JSON.parse(savedGoals);
+        // Filter out legacy dummy goals
+        const realGoals = parsedGoals.filter(
+          (g) => !["goal-dsa-1", "goal-japanese-2", "goal-portfolio-3"].includes(g.id)
+        );
+        setGoals(realGoals);
+        if (realGoals.length > 0) {
+          const savedActiveGoalId = localStorage.getItem("saathi_v2_active_goal_id");
+          const validActiveId = realGoals.find((g) => g.id === savedActiveGoalId)?.id || realGoals[0].id;
+          setActiveGoalId(validActiveId);
+        } else {
+          setActiveGoalId("");
+        }
       }
-
-      const savedActiveGoalId = localStorage.getItem("saathi_v2_active_goal_id");
-      if (savedActiveGoalId) {
-        setActiveGoalId(savedActiveGoalId);
-      } else {
-        localStorage.removeItem("saathi_active_goal_id");
-      }
-
       const savedProfile = localStorage.getItem("saathi_v2_profile");
       if (savedProfile) {
         const parsed = JSON.parse(savedProfile);
-        // Sanitize legacy mock values if present
-        if (parsed.streakDays === 7 && parsed.totalXp === 850) {
+        if (parsed.email === "user@example.com" && parsed.streakDays === 7) {
           setUserProfile(initialUserProfile);
         } else {
           setUserProfile(parsed);
         }
-      } else {
-        localStorage.removeItem("saathi_profile");
-        setUserProfile(initialUserProfile);
       }
-
       const savedMessages = localStorage.getItem("saathi_v2_messages");
       if (savedMessages) {
         setChatMessages(JSON.parse(savedMessages));
-      } else {
-        localStorage.removeItem("saathi_messages");
       }
     } catch (e) {
       console.error("Failed to load state from localStorage", e);
+    }
+
+    // If Supabase is configured, check live auth & fetch real database records
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+
+      const fetchSupabaseData = async (uid: string) => {
+        setIsLoading(true);
+        try {
+          // Fetch Profile
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", uid)
+            .single();
+
+          if (profileData) {
+            setUserProfile((prev) => ({
+              ...prev,
+              name: profileData.name || prev.name,
+              email: profileData.email || prev.email,
+              avatarUrl: profileData.avatar_url || prev.avatarUrl,
+              streakDays: profileData.streak_days ?? prev.streakDays,
+              totalXp: profileData.total_xp ?? prev.totalXp,
+              level: profileData.level ?? prev.level,
+              coachPersona: profileData.coach_persona || prev.coachPersona,
+              adaptationSensitivity: profileData.adaptation_sensitivity || prev.adaptationSensitivity,
+            }));
+          }
+
+          // Fetch Goals, Milestones, and Tasks
+          const { data: dbGoals } = await supabase
+            .from("goals")
+            .select(`
+              *,
+              milestones (
+                *,
+                tasks (*)
+              )
+            `)
+            .eq("user_id", uid)
+            .order("created_at", { ascending: false });
+
+          if (dbGoals && dbGoals.length > 0) {
+            const formattedGoals: Goal[] = dbGoals.map((g: any) => ({
+              id: g.id,
+              title: g.title,
+              description: g.description || "",
+              targetDeadline: g.deadline,
+              currentLevel: g.current_level,
+              dailyMinutesTarget: g.daily_minutes_target,
+              preferredSchedule: g.preferred_schedule,
+              status: g.status,
+              category: g.category,
+              weakAreas: g.weak_areas || [],
+              strongAreas: g.strong_areas || [],
+              createdAt: g.created_at,
+              milestones: (g.milestones || [])
+                .sort((a: any, b: any) => a.order_index - b.order_index)
+                .map((m: any) => ({
+                  id: m.id,
+                  goalId: m.goal_id,
+                  title: m.title,
+                  description: m.description || "",
+                  order: m.order_index,
+                  status: m.status,
+                  estimatedDays: m.estimated_days,
+                  tasks: (m.tasks || []).map((t: any) => ({
+                    id: t.id,
+                    milestoneId: t.milestone_id,
+                    title: t.title,
+                    description: t.description || "",
+                    difficulty: t.difficulty,
+                    estimatedMinutes: t.estimated_minutes,
+                    actualMinutes: t.actual_minutes,
+                    dueDate: t.due_date,
+                    status: t.status,
+                    priority: t.priority,
+                    topic: t.topic,
+                    tags: t.tags || [],
+                    wasAdapted: t.was_adapted,
+                    adaptationReason: t.adaptation_reason,
+                  })),
+                })),
+            }));
+
+            setGoals(formattedGoals);
+            setActiveGoalId(formattedGoals[0]?.id || "");
+          }
+
+          // Fetch Checkins
+          const { data: dbCheckins } = await supabase
+            .from("checkins")
+            .select("*")
+            .eq("user_id", uid)
+            .order("created_at", { ascending: false });
+
+          if (dbCheckins && dbCheckins.length > 0) {
+            const formattedCheckins: CheckIn[] = dbCheckins.map((c: any) => ({
+              id: c.id,
+              goalId: c.goal_id,
+              date: c.checkin_date,
+              completedTaskIds: c.completed_task_ids || [],
+              actualMinutesSpent: c.actual_minutes_spent,
+              perceivedDifficulty: c.perceived_difficulty,
+              mood: c.mood,
+              confidenceScore: c.confidence_score,
+              blockers: c.blockers,
+              reflectionNotes: c.reflection_notes,
+            }));
+            setCheckIns(formattedCheckins);
+          }
+        } catch (err) {
+          console.warn("Error fetching Supabase user data:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      // Check current session
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+          setUserId(user.id);
+          fetchSupabaseData(user.id);
+        }
+      });
+
+      // Listen for auth state changes (login/logout)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          setUserId(session.user.id);
+          fetchSupabaseData(session.user.id);
+        } else {
+          setUserId(null);
+        }
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
     }
   }, []);
 
@@ -112,7 +253,28 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const activeGoal = goals.find((g) => g.id === activeGoalId) || goals[0] || null;
 
   const updateUserProfile = (profileUpdates: Partial<UserProfile>) => {
-    setUserProfile((prev) => ({ ...prev, ...profileUpdates }));
+    setUserProfile((prev) => {
+      const updated = { ...prev, ...profileUpdates };
+      if (isSupabaseConfigured() && userId) {
+        const supabase = createClient();
+        supabase
+          .from("profiles")
+          .update({
+            name: updated.name,
+            coach_persona: updated.coachPersona,
+            adaptation_sensitivity: updated.adaptationSensitivity,
+            streak_days: updated.streakDays,
+            total_xp: updated.totalXp,
+            level: updated.level,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", userId)
+          .then(({ error }) => {
+            if (error) console.warn("Supabase profile update warning:", error);
+          });
+      }
+      return updated;
+    });
   };
 
   const updateActiveGoal = (goalUpdates: Partial<Goal>) => {
@@ -120,6 +282,23 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setGoals((prev) =>
       prev.map((g) => (g.id === activeGoal.id ? { ...g, ...goalUpdates } : g))
     );
+
+    if (isSupabaseConfigured() && userId && activeGoal.id && !activeGoal.id.startsWith("goal-dummy")) {
+      const supabase = createClient();
+      supabase
+        .from("goals")
+        .update({
+          title: goalUpdates.title ?? activeGoal.title,
+          description: goalUpdates.description ?? activeGoal.description,
+          daily_minutes_target: goalUpdates.dailyMinutesTarget ?? activeGoal.dailyMinutesTarget,
+          status: goalUpdates.status ?? activeGoal.status,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", activeGoal.id)
+        .then(({ error }) => {
+          if (error) console.warn("Supabase goal update warning:", error);
+        });
+    }
   };
 
   // Extract tasks for today
@@ -139,6 +318,7 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!activeGoal) return;
 
     let justCompleted = false;
+    let finalStatus: "completed" | "pending" = "pending";
 
     setGoals((prevGoals) =>
       prevGoals.map((g) => {
@@ -147,6 +327,7 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const updatedTasks = m.tasks.map((t) => {
             if (t.id === taskId) {
               const newStatus = t.status === "completed" ? "pending" : "completed";
+              finalStatus = newStatus;
               if (newStatus === "completed") justCompleted = true;
               return { ...t, status: newStatus as any };
             }
@@ -157,6 +338,18 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return { ...g, milestones: updatedMilestones };
       })
     );
+
+    // Sync task status to Supabase if not dummy id
+    if (isSupabaseConfigured() && userId && !taskId.startsWith("task-")) {
+      const supabase = createClient();
+      supabase
+        .from("tasks")
+        .update({ status: finalStatus, updated_at: new Date().toISOString() })
+        .eq("id", taskId)
+        .then(({ error }) => {
+          if (error) console.warn("Supabase task sync error:", error);
+        });
+    }
 
     if (justCompleted) {
       // Trigger rewarding confetti & XP boost
@@ -172,11 +365,22 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setUserProfile((prev) => {
         const newXp = prev.totalXp + 25;
         const newLevel = Math.floor(newXp / 150) + 1;
-        return {
+        const updated = {
           ...prev,
           totalXp: newXp,
           level: newLevel,
         };
+
+        if (isSupabaseConfigured() && userId) {
+          const supabase = createClient();
+          supabase
+            .from("profiles")
+            .update({ total_xp: newXp, level: newLevel, updated_at: new Date().toISOString() })
+            .eq("id", userId)
+            .then(() => {});
+        }
+
+        return updated;
       });
     }
   };
@@ -209,6 +413,29 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       completedTasks: completed,
       uncompletedTasks: uncompleted,
     });
+
+    // Sync Check-in to Supabase
+    if (isSupabaseConfigured() && userId && activeGoal.id && !activeGoal.id.startsWith("goal-dummy")) {
+      const supabase = createClient();
+      supabase
+        .from("checkins")
+        .insert({
+          user_id: userId,
+          goal_id: activeGoal.id,
+          checkin_date: newCheckIn.date,
+          completed_task_ids: checkInData.completedTaskIds.filter((id) => !id.startsWith("task-")),
+          actual_minutes_spent: checkInData.actualMinutesSpent,
+          perceived_difficulty: checkInData.perceivedDifficulty,
+          mood: checkInData.mood,
+          confidence_score: checkInData.confidenceScore,
+          blockers: checkInData.blockers,
+          reflection_notes: checkInData.reflectionNotes,
+          ai_feedback_summary: proposal.coachEncouragement,
+        })
+        .then(({ error }) => {
+          if (error) console.warn("Supabase checkin insert warning:", error);
+        });
+    }
 
     setLatestProposal(proposal);
     return proposal;
@@ -259,6 +486,7 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             status: "pending" as const,
             priority: "high" as const,
             topic: "Fundamentals",
+            tags: [],
           },
           {
             id: `task-${Date.now()}-2`,
@@ -271,6 +499,7 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             status: "pending" as const,
             priority: "high" as const,
             topic: "Practice",
+            tags: [],
           },
           {
             id: `task-${Date.now()}-3`,
@@ -283,6 +512,7 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             status: "pending" as const,
             priority: "medium" as const,
             topic: "Recall",
+            tags: [],
           },
         ],
       },
@@ -326,6 +556,68 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setGoals((prev) => [newGoal, ...prev]);
     setActiveGoalId(newGoal.id);
+
+    // Sync to Supabase if logged in
+    if (isSupabaseConfigured() && userId) {
+      const supabase = createClient();
+      supabase
+        .from("goals")
+        .insert({
+          user_id: userId,
+          title: newGoal.title,
+          description: newGoal.description,
+          deadline: newGoal.targetDeadline,
+          current_level: newGoal.currentLevel,
+          daily_minutes_target: newGoal.dailyMinutesTarget,
+          preferred_schedule: newGoal.preferredSchedule,
+          status: newGoal.status,
+          category: newGoal.category,
+          weak_areas: newGoal.weakAreas || [],
+          strong_areas: newGoal.strongAreas || [],
+        })
+        .select()
+        .single()
+        .then(async ({ data: savedGoal, error }) => {
+          if (error || !savedGoal) {
+            console.warn("Supabase goal creation warning:", error);
+            return;
+          }
+
+          // Insert Milestones & Tasks for this goal
+          for (const ms of defaultMilestones) {
+            const { data: savedMs } = await supabase
+              .from("milestones")
+              .insert({
+                goal_id: savedGoal.id,
+                title: ms.title,
+                description: ms.description,
+                order_index: ms.order,
+                status: ms.status,
+                estimated_days: ms.estimatedDays,
+              })
+              .select()
+              .single();
+
+            if (savedMs && ms.tasks.length > 0) {
+              const taskInserts = ms.tasks.map((t: any) => ({
+                goal_id: savedGoal.id,
+                milestone_id: savedMs.id,
+                title: t.title,
+                description: t.description,
+                difficulty: t.difficulty,
+                estimated_minutes: t.estimatedMinutes,
+                due_date: t.dueDate,
+                status: t.status,
+                priority: t.priority,
+                topic: t.topic,
+                tags: t.tags || [],
+              }));
+              await supabase.from("tasks").insert(taskInserts);
+            }
+          }
+        });
+    }
+
     return newGoal;
   };
 
@@ -426,6 +718,7 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         weeklyReview,
         isCheckInModalOpen,
         setIsCheckInModalOpen,
+        isLoading,
       }}
     >
       {children}

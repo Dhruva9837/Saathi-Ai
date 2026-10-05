@@ -61,10 +61,10 @@ export const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-60 shrink-0 border-r border-[#1E293B] bg-[#0B1120] hidden md:flex flex-col justify-between p-4 min-h-[calc(100vh-4rem)]">
+    <aside className="w-60 shrink-0 border-r border-[rgba(255,255,255,0.07)] bg-[#0A0B14] hidden md:flex flex-col justify-between p-4 min-h-[calc(100vh-4rem)]">
       <div className="space-y-6">
         <div>
-          <div className="px-3 mb-2 text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">
+          <div className="px-3 mb-2 text-[11px] font-semibold text-[#8B90A8] uppercase tracking-wider">
             Menu
           </div>
           <nav className="space-y-1">
@@ -77,24 +77,24 @@ export const Sidebar: React.FC = () => {
                   href={item.href}
                   className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
                     isActive
-                      ? "bg-[#151E2E] text-[#818CF8] border border-[#1E293B]"
-                      : "text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#151E2E]"
+                      ? "bg-[#171A2B] text-[#7C6CFF] border border-[rgba(255,255,255,0.07)]"
+                      : "text-[#8B90A8] hover:text-[#F2F3F8] hover:bg-[#171A2B]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon
                       className={`h-4 w-4 ${
-                        isActive ? "text-[#818CF8]" : "text-[#94A3B8]"
+                        isActive ? "text-[#7C6CFF]" : "text-[#8B90A8]"
                       }`}
                     />
                     <span>{item.name}</span>
                   </div>
                   {item.badge && (
                     <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded font-medium ${
+                      className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
                         isActive
-                          ? "bg-[#1E293B] text-[#818CF8]"
-                          : "bg-[#151E2E] text-[#94A3B8]"
+                          ? "bg-[#7C6CFF]/15 text-[#7C6CFF]"
+                          : "bg-[#11131F] text-[#8B90A8] border border-[rgba(255,255,255,0.07)]"
                       }`}
                     >
                       {item.badge}
@@ -107,29 +107,29 @@ export const Sidebar: React.FC = () => {
         </div>
 
         {/* Quick Goal Creation Card */}
-        <div className="p-3.5 rounded-xl border border-[#1E293B] bg-[#151E2E]">
-          <div className="flex items-center gap-2 mb-1.5 text-[#818CF8]">
+        <div className="p-3.5 rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F]">
+          <div className="flex items-center gap-2 mb-1.5 text-[#7C6CFF]">
             <Compass className="h-4 w-4" />
-            <span className="text-xs font-bold text-[#F8FAFC]">Create Goal</span>
+            <span className="text-xs font-bold text-[#F2F3F8]">Create Goal</span>
           </div>
-          <p className="text-[11px] text-[#94A3B8] mb-3 leading-relaxed">
+          <p className="text-[11px] text-[#8B90A8] mb-3 leading-relaxed">
             Generate an AI-structured roadmap tailored to your timeline.
           </p>
           <Link
             href="/onboarding"
-            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-[#0B1120] hover:bg-[#1E293B] border border-[#1E293B] text-xs text-[#F8FAFC] font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-[#0A0B14] hover:bg-[#171A2B] border border-[rgba(255,255,255,0.07)] text-xs text-[#F2F3F8] font-medium transition-colors"
           >
-            <PlusCircle className="h-3.5 w-3.5 text-[#818CF8]" />
+            <PlusCircle className="h-3.5 w-3.5 text-[#7C6CFF]" />
             <span>New Roadmap</span>
           </Link>
         </div>
       </div>
 
       {/* Footer Info Box */}
-      <div className="p-2.5 rounded-lg bg-[#151E2E] border border-[#1E293B]">
-        <div className="flex items-center gap-2 text-[11px] text-[#94A3B8]">
-          <Sparkles className="h-3.5 w-3.5 text-[#22C55E]" />
-          <span>Feedback Loop: <strong className="text-[#F8FAFC]">Active</strong></span>
+      <div className="p-2.5 rounded-lg bg-[#11131F] border border-[rgba(255,255,255,0.07)]">
+        <div className="flex items-center gap-2 text-[11px] text-[#8B90A8]">
+          <Sparkles className="h-3.5 w-3.5 text-[#3DDC97]" />
+          <span>Feedback Loop: <strong className="text-[#F2F3F8]">Active</strong></span>
         </div>
       </div>
     </aside>

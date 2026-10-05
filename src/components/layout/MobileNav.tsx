@@ -46,7 +46,7 @@ export const MobileNav: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0B1120]/90 backdrop-blur-lg border-t border-[#1E293B] px-2 py-1.5 safe-area-pb">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0A0B14]/90 backdrop-blur-lg border-t border-[rgba(255,255,255,0.07)] px-2 py-1.5 safe-area-pb">
       <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map((item, idx) => {
           const Icon = item.icon;
@@ -58,10 +58,10 @@ export const MobileNav: React.FC = () => {
                 onClick={item.action}
                 className="flex flex-col items-center justify-center -mt-5 group"
               >
-                <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#818CF8] text-white flex items-center justify-center shadow-lg shadow-[#6366F1]/40 border-2 border-[#0B1120] transform group-active:scale-95 transition-all">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-[#7C6CFF] to-[#4F8BFF] text-white flex items-center justify-center shadow-lg shadow-[#7C6CFF]/40 border-2 border-[#0A0B14] transform group-active:scale-95 transition-all">
                   <Icon className="h-5 w-5 animate-pulse" />
                 </div>
-                <span className="text-[10px] font-semibold text-[#818CF8] mt-0.5">
+                <span className="text-[10px] font-semibold text-[#7C6CFF] mt-0.5">
                   Check-in
                 </span>
               </button>
@@ -75,11 +75,11 @@ export const MobileNav: React.FC = () => {
               href={item.href!}
               className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg transition-colors ${
                 isActive
-                  ? "text-[#818CF8]"
-                  : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                  ? "text-[#7C6CFF]"
+                  : "text-[#8B90A8] hover:text-[#F2F3F8]"
               }`}
             >
-              <Icon className={`h-5 w-5 ${isActive ? "text-[#818CF8]" : "text-[#94A3B8]"}`} />
+              <Icon className={`h-5 w-5 ${isActive ? "text-[#7C6CFF]" : "text-[#8B90A8]"}`} />
               <span className="text-[10px] font-medium mt-0.5">{item.name}</span>
             </Link>
           );

@@ -92,7 +92,6 @@ export const AnalyticsView: React.FC = () => {
 
     const topics = Object.keys(topicMap);
     if (topics.length < 3) {
-      // Provide meaningful defaults if goal has few milestones
       return [
         { subject: activeGoal.title.split(" ")[0] || "Foundations", mastery: 25 },
         { subject: "Practice Drills", mastery: 15 },
@@ -107,7 +106,7 @@ export const AnalyticsView: React.FC = () => {
       const mastery = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 10;
       return {
         subject: topic,
-        mastery: Math.max(mastery, 10), // minimum base floor for visual graph
+        mastery: Math.max(mastery, 10),
       };
     });
   }, [activeGoal, userProfile]);
@@ -130,25 +129,25 @@ export const AnalyticsView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-xl border border-[#1E293B] p-6 bg-[#151E2E]">
+      <div className="rounded-xl border border-[rgba(255,255,255,0.07)] p-6 bg-[#11131F]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded font-semibold bg-[#1E293B] text-[#818CF8] text-[10px] uppercase tracking-wider border border-[#334155]">
+              <span className="px-2.5 py-0.5 rounded font-semibold bg-[#171A2B] text-[#7C6CFF] text-[10px] uppercase tracking-wider border border-[rgba(255,255,255,0.07)]">
                 Analytics
               </span>
-              <span className="text-[#94A3B8] text-xs">• Real-Time Performance</span>
+              <span className="text-[#8B90A8] text-xs">• Real-Time Performance</span>
             </div>
-            <h2 className="text-xl font-bold text-[#F8FAFC] font-heading">
+            <h2 className="text-xl font-bold text-[#F2F3F8] font-heading">
               Progress & Velocity
             </h2>
-            <p className="text-xs text-[#94A3B8] mt-1">
-              Tracking consistency, study hours, and skill curves for <span className="text-[#818CF8] font-medium">{activeGoal?.title || "Active Goal"}</span>.
+            <p className="text-xs text-[#8B90A8] mt-1">
+              Tracking consistency, study hours, and skill curves for <span className="text-[#7C6CFF] font-medium">{activeGoal?.title || "Active Goal"}</span>.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1.5 rounded-lg bg-[#1E293B] border border-[#334155] text-[#22C55E] text-xs font-semibold flex items-center gap-1.5">
+            <span className="px-3 py-1.5 rounded-lg bg-[#171A2B] border border-[rgba(255,255,255,0.07)] text-[#3DDC97] text-xs font-semibold flex items-center gap-1.5">
               <TrendingUp className="h-4 w-4" />
               <span>{userProfile.streakDays} Day Active Streak</span>
             </span>
@@ -159,23 +158,23 @@ export const AnalyticsView: React.FC = () => {
       {/* Main Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 1. Daily Study Time: Planned vs Actual */}
-        <div className="rounded-xl border border-[#1E293B] bg-[#151E2E] p-5 shadow-sm">
+        <div className="rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F] p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-sm font-bold text-[#F8FAFC] flex items-center gap-2">
-                <Clock className="h-4 w-4 text-[#818CF8]" />
+              <h3 className="text-sm font-bold text-[#F2F3F8] flex items-center gap-2">
+                <Clock className="h-4 w-4 text-[#7C6CFF]" />
                 <span>Daily Minutes: Planned vs. Actual</span>
               </h3>
-              <p className="text-[11px] text-[#94A3B8]">
+              <p className="text-[11px] text-[#8B90A8]">
                 Pacing calibrated dynamically via daily check-ins
               </p>
             </div>
             <div className="flex items-center gap-3 text-[10px]">
-              <span className="flex items-center gap-1 text-[#94A3B8]">
-                <span className="h-2 w-2 rounded bg-[#334155]" /> Planned
+              <span className="flex items-center gap-1 text-[#8B90A8]">
+                <span className="h-2 w-2 rounded bg-[#171A2B] border border-[rgba(255,255,255,0.15)]" /> Planned
               </span>
-              <span className="flex items-center gap-1 text-[#818CF8]">
-                <span className="h-2 w-2 rounded bg-[#6366F1]" /> Actual
+              <span className="flex items-center gap-1 text-[#7C6CFF]">
+                <span className="h-2 w-2 rounded bg-[#7C6CFF]" /> Actual
               </span>
             </div>
           </div>
@@ -183,38 +182,38 @@ export const AnalyticsView: React.FC = () => {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailyTimeData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-                <XAxis dataKey="day" stroke="#94A3B8" fontSize={11} />
-                <YAxis stroke="#94A3B8" fontSize={11} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
+                <XAxis dataKey="day" stroke="#8B90A8" fontSize={11} />
+                <YAxis stroke="#8B90A8" fontSize={11} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0B1120",
-                    borderColor: "#1E293B",
+                    backgroundColor: "#0A0B14",
+                    borderColor: "rgba(255,255,255,0.1)",
                     borderRadius: "0.5rem",
                     fontSize: "12px",
-                    color: "#F8FAFC",
+                    color: "#F2F3F8",
                   }}
                 />
-                <Bar dataKey="planned" fill="#334155" radius={[4, 4, 0, 0]} name="Planned (min)" />
-                <Bar dataKey="actual" fill="#6366F1" radius={[4, 4, 0, 0]} name="Actual (min)" />
+                <Bar dataKey="planned" fill="#171A2B" stroke="rgba(255,255,255,0.1)" radius={[4, 4, 0, 0]} name="Planned (min)" />
+                <Bar dataKey="actual" fill="#7C6CFF" radius={[4, 4, 0, 0]} name="Actual (min)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* 2. Skill Mastery Radar Chart */}
-        <div className="rounded-xl border border-[#1E293B] bg-[#151E2E] p-5 shadow-sm">
+        <div className="rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F] p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-sm font-bold text-[#F8FAFC] flex items-center gap-2">
-                <Zap className="h-4 w-4 text-[#818CF8]" />
+              <h3 className="text-sm font-bold text-[#F2F3F8] flex items-center gap-2">
+                <Zap className="h-4 w-4 text-[#7C6CFF]" />
                 <span>Skill Mastery Radar</span>
               </h3>
-              <p className="text-[11px] text-[#94A3B8]">
+              <p className="text-[11px] text-[#8B90A8]">
                 Generated dynamically from your roadmap tasks
               </p>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded font-semibold bg-[#1E293B] text-[#818CF8] border border-[#818CF8]/30">
+            <span className="text-[10px] px-2 py-0.5 rounded font-semibold bg-[#171A2B] text-[#7C6CFF] border border-[#7C6CFF]/30">
               Active Phase
             </span>
           </div>
@@ -222,14 +221,14 @@ export const AnalyticsView: React.FC = () => {
           <div className="h-64 w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={skillRadarData}>
-                <PolarGrid stroke="#1E293B" />
-                <PolarAngleAxis dataKey="subject" stroke="#94A3B8" fontSize={10} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#334155" fontSize={9} />
+                <PolarGrid stroke="rgba(255,255,255,0.07)" />
+                <PolarAngleAxis dataKey="subject" stroke="#8B90A8" fontSize={10} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(255,255,255,0.1)" fontSize={9} />
                 <Radar
                   name="Mastery %"
                   dataKey="mastery"
-                  stroke="#6366F1"
-                  fill="#6366F1"
+                  stroke="#7C6CFF"
+                  fill="#7C6CFF"
                   fillOpacity={0.35}
                 />
               </RadarChart>
@@ -241,17 +240,17 @@ export const AnalyticsView: React.FC = () => {
       {/* Consistency & Gamification Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Streak & Consistency */}
-        <div className="rounded-xl border border-[#1E293B] bg-[#151E2E] p-5">
-          <div className="flex items-center gap-2 text-[#F59E0B] mb-3">
-            <Flame className="h-5 w-5 fill-[#F59E0B] text-[#F59E0B]" />
-            <h4 className="text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">
+        <div className="rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F] p-5">
+          <div className="flex items-center gap-2 text-[#F5B544] mb-3">
+            <Flame className="h-5 w-5 fill-[#F5B544] text-[#F5B544]" />
+            <h4 className="text-xs font-bold text-[#F2F3F8] uppercase tracking-wider">
               Consistency Streak
             </h4>
           </div>
-          <div className="text-3xl font-bold text-[#F59E0B] font-mono mb-2">
+          <div className="text-3xl font-bold text-[#F5B544] font-mono mb-2">
             {userProfile.streakDays} {userProfile.streakDays === 1 ? "Day" : "Days"}
           </div>
-          <p className="text-xs text-[#94A3B8] mb-3">
+          <p className="text-xs text-[#8B90A8] mb-3">
             {userProfile.streakDays > 1
               ? `You've maintained focus for ${userProfile.streakDays} consecutive days!`
               : "Day 1 of your journey! Complete today's mission to start your streak."}
@@ -262,8 +261,8 @@ export const AnalyticsView: React.FC = () => {
                 key={i}
                 className={`flex-1 py-1.5 rounded border text-[10px] text-center font-bold ${
                   i < userProfile.streakDays
-                    ? "bg-[#F59E0B]/20 border-[#F59E0B]/40 text-[#F59E0B]"
-                    : "bg-[#0B1120] border-[#1E293B] text-[#64748B]"
+                    ? "bg-[#F5B544]/20 border-[#F5B544]/40 text-[#F5B544]"
+                    : "bg-[#0A0B14] border-[rgba(255,255,255,0.07)] text-[#8B90A8]/50"
                 }`}
               >
                 {d.split(" ")[1]}
@@ -273,39 +272,39 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Level & XP Progression */}
-        <div className="rounded-xl border border-[#1E293B] bg-[#151E2E] p-5">
-          <div className="flex items-center gap-2 text-[#818CF8] mb-3">
+        <div className="rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F] p-5">
+          <div className="flex items-center gap-2 text-[#7C6CFF] mb-3">
             <Award className="h-5 w-5" />
-            <h4 className="text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">
+            <h4 className="text-xs font-bold text-[#F2F3F8] uppercase tracking-wider">
               Level & XP
             </h4>
           </div>
-          <div className="text-3xl font-bold text-[#818CF8] font-mono mb-1">
+          <div className="text-3xl font-bold text-[#7C6CFF] font-mono mb-1">
             Level {userProfile.level}
           </div>
-          <div className="text-xs text-[#94A3B8] mb-2">
+          <div className="text-xs text-[#8B90A8] mb-2">
             {userProfile.totalXp} XP Total ({xpRemainingToNextLevel} XP to Level {userProfile.level + 1})
           </div>
-          <div className="w-full bg-[#0B1120] h-2 rounded-full overflow-hidden border border-[#1E293B]">
+          <div className="w-full bg-[#0A0B14] h-2 rounded-full overflow-hidden border border-[rgba(255,255,255,0.07)]">
             <div
-              className="bg-gradient-to-r from-[#6366F1] to-[#818CF8] h-full rounded-full transition-all"
+              className="bg-gradient-to-r from-[#7C6CFF] to-[#4F8BFF] h-full rounded-full transition-all"
               style={{ width: `${(xpProgressInCurrentLevel / 150) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Plan Retention Rate */}
-        <div className="rounded-xl border border-[#1E293B] bg-[#151E2E] p-5">
-          <div className="flex items-center gap-2 text-[#22C55E] mb-3">
+        <div className="rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F] p-5">
+          <div className="flex items-center gap-2 text-[#3DDC97] mb-3">
             <CheckCircle className="h-5 w-5" />
-            <h4 className="text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">
+            <h4 className="text-xs font-bold text-[#F2F3F8] uppercase tracking-wider">
               Goal Completion Rate
             </h4>
           </div>
-          <div className="text-3xl font-bold text-[#22C55E] font-mono mb-2">
+          <div className="text-3xl font-bold text-[#3DDC97] font-mono mb-2">
             {retentionPercent}%
           </div>
-          <p className="text-xs text-[#94A3B8]">
+          <p className="text-xs text-[#8B90A8]">
             {completedGoalTasks} of {totalGoalTasks} scheduled tasks completed.
           </p>
         </div>

@@ -29,27 +29,27 @@ export function getDifficultyColor(diff: string): { bg: string; text: string; bo
   switch (diff?.toLowerCase()) {
     case "easy":
       return {
-        bg: "bg-emerald-500/10",
-        text: "text-emerald-400",
-        border: "border-emerald-500/30",
+        bg: "bg-[#3DDC97]/10",
+        text: "text-[#3DDC97]",
+        border: "border-[#3DDC97]/30",
       };
     case "medium":
       return {
-        bg: "bg-amber-500/10",
-        text: "text-amber-400",
-        border: "border-amber-500/30",
+        bg: "bg-[#F5B544]/10",
+        text: "text-[#F5B544]",
+        border: "border-[#F5B544]/30",
       };
     case "hard":
       return {
-        bg: "bg-rose-500/10",
-        text: "text-rose-400",
-        border: "border-rose-500/30",
+        bg: "bg-[#FF6B7A]/10",
+        text: "text-[#FF6B7A]",
+        border: "border-[#FF6B7A]/30",
       };
     default:
       return {
-        bg: "bg-blue-500/10",
-        text: "text-blue-400",
-        border: "border-blue-500/30",
+        bg: "bg-[#4F8BFF]/10",
+        text: "text-[#4F8BFF]",
+        border: "border-[#4F8BFF]/30",
       };
   }
 }
@@ -57,11 +57,11 @@ export function getDifficultyColor(diff: string): { bg: string; text: string; bo
 export function getPriorityColor(priority: string): { bg: string; text: string; dot: string } {
   switch (priority?.toLowerCase()) {
     case "high":
-      return { bg: "bg-rose-500/15", text: "text-rose-300", dot: "bg-rose-500" };
+      return { bg: "bg-[#FF6B7A]/15", text: "text-[#FF6B7A]", dot: "bg-[#FF6B7A]" };
     case "medium":
-      return { bg: "bg-amber-500/15", text: "text-amber-300", dot: "bg-amber-500" };
+      return { bg: "bg-[#F5B544]/15", text: "text-[#F5B544]", dot: "bg-[#F5B544]" };
     case "low":
     default:
-      return { bg: "bg-blue-500/15", text: "text-blue-300", dot: "bg-blue-500" };
+      return { bg: "bg-[#4F8BFF]/15", text: "text-[#4F8BFF]", dot: "bg-[#4F8BFF]" };
   }
 }

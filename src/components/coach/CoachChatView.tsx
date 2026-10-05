@@ -162,41 +162,41 @@ export const CoachChatView: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8.5rem)] rounded-xl border border-[#1E293B] bg-[#151E2E] overflow-hidden shadow-sm">
+    <div className="flex flex-col h-[calc(100vh-8.5rem)] rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F] overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="p-4 border-b border-[#1E293B] bg-[#0B1120] flex flex-wrap items-center justify-between gap-3">
+      <div className="p-4 border-b border-[rgba(255,255,255,0.07)] bg-[#0A0B14] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#6366F1] text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#7C6CFF] to-[#4F8BFF] text-white">
             <BotMessageSquare className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-[#F8FAFC]">
+              <h2 className="text-sm font-bold text-[#F2F3F8]">
                 AI Coach
               </h2>
               <Link
                 href="/dashboard/settings"
-                className="text-[10px] px-2 py-0.5 rounded font-medium bg-[#151E2E] hover:bg-[#1E293B] text-[#818CF8] border border-[#818CF8]/40 flex items-center gap-1 transition-colors"
+                className="text-[10px] px-2 py-0.5 rounded font-medium bg-[#171A2B] hover:bg-[#171A2B]/80 text-[#7C6CFF] border border-[#7C6CFF]/40 flex items-center gap-1 transition-colors"
                 title="Change AI Coach Persona in Settings"
               >
                 <span>{activePersonaLabel}</span>
                 <Sliders className="h-2.5 w-2.5" />
               </Link>
             </div>
-            <p className="text-[11px] text-[#94A3B8]">
-              Context: <span className="text-[#818CF8] font-medium">{activeGoal?.title || "Active Goal"}</span>
+            <p className="text-[11px] text-[#8B90A8]">
+              Context: <span className="text-[#7C6CFF] font-medium">{activeGoal?.title || "Active Goal"}</span>
             </p>
           </div>
         </div>
 
         {/* Live Context Pills */}
         <div className="flex flex-wrap items-center gap-2 text-[10px]">
-          <span className="px-2.5 py-1 rounded bg-[#151E2E] border border-[#1E293B] text-[#F59E0B] flex items-center gap-1">
-            <Flame className="h-3 w-3 fill-[#F59E0B]" />
+          <span className="px-2.5 py-1 rounded bg-[#171A2B] border border-[rgba(255,255,255,0.07)] text-[#F5B544] flex items-center gap-1 font-semibold">
+            <Flame className="h-3 w-3 fill-[#F5B544]" />
             <span>{userProfile.streakDays}d Streak</span>
           </span>
-          <span className="px-2.5 py-1 rounded bg-[#151E2E] border border-[#1E293B] text-[#94A3B8] flex items-center gap-1">
-            <Clock className="h-3 w-3 text-[#818CF8]" />
+          <span className="px-2.5 py-1 rounded bg-[#171A2B] border border-[rgba(255,255,255,0.07)] text-[#8B90A8] flex items-center gap-1">
+            <Clock className="h-3 w-3 text-[#7C6CFF]" />
             <span>{activeGoal?.dailyMinutesTarget || 60}m Target</span>
           </span>
         </div>
@@ -216,7 +216,7 @@ export const CoachChatView: React.FC = () => {
               }`}
             >
               {isCoach && (
-                <div className="h-7 w-7 rounded-lg bg-[#6366F1] flex items-center justify-center text-white shrink-0 mt-0.5">
+                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#7C6CFF] to-[#4F8BFF] flex items-center justify-center text-white shrink-0 mt-0.5">
                   <BotMessageSquare className="h-4 w-4" />
                 </div>
               )}
@@ -224,13 +224,13 @@ export const CoachChatView: React.FC = () => {
               <div
                 className={`max-w-xl rounded-xl p-4 text-xs leading-relaxed relative group ${
                   isCoach
-                    ? "bg-[#0B1120] border border-[#1E293B] text-[#F8FAFC]"
-                    : "bg-[#6366F1] text-white"
+                    ? "bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-[#F2F3F8]"
+                    : "bg-gradient-to-r from-[#7C6CFF] to-[#6352E8] text-white"
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5 gap-2">
                   {msg.contextTag ? (
-                    <div className="text-[10px] font-semibold text-[#818CF8] flex items-center gap-1">
+                    <div className="text-[10px] font-semibold text-[#7C6CFF] flex items-center gap-1">
                       <Sparkles className="h-2.5 w-2.5" />
                       <span>{msg.contextTag}</span>
                     </div>
@@ -241,13 +241,13 @@ export const CoachChatView: React.FC = () => {
                       onClick={() => handleSpeak(msg.id, msg.content)}
                       className={`text-[10px] p-1 rounded-md transition-colors ${
                         isSpeaking
-                          ? "bg-[#818CF8]/20 text-[#818CF8]"
-                          : "text-[#64748B] hover:text-[#CBD5E1] opacity-0 group-hover:opacity-100"
+                          ? "bg-[#7C6CFF]/20 text-[#7C6CFF]"
+                          : "text-[#8B90A8] hover:text-[#F2F3F8] opacity-0 group-hover:opacity-100"
                       }`}
                       title={isSpeaking ? "Stop speech" : "Read aloud"}
                     >
                       {isSpeaking ? (
-                        <VolumeX className="h-3.5 w-3.5 text-[#818CF8] animate-pulse" />
+                        <VolumeX className="h-3.5 w-3.5 text-[#7C6CFF] animate-pulse" />
                       ) : (
                         <Volume2 className="h-3.5 w-3.5" />
                       )}
@@ -260,12 +260,12 @@ export const CoachChatView: React.FC = () => {
                 </div>
 
                 {msg.suggestedActions && msg.suggestedActions.length > 0 && (
-                  <div className="mt-3 pt-2.5 border-t border-[#1E293B] flex flex-wrap gap-2">
+                  <div className="mt-3 pt-2.5 border-t border-[rgba(255,255,255,0.07)] flex flex-wrap gap-2">
                     {msg.suggestedActions.map((action, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleSend(action.label)}
-                        className="text-[11px] px-2.5 py-1 rounded bg-[#151E2E] border border-[#1E293B] hover:border-[#334155] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
+                        className="text-[11px] px-2.5 py-1 rounded bg-[#171A2B] border border-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] text-[#8B90A8] hover:text-[#F2F3F8] transition-colors"
                       >
                         {action.label}
                       </button>
@@ -275,7 +275,7 @@ export const CoachChatView: React.FC = () => {
 
                 <div
                   className={`text-[9px] mt-2 font-mono ${
-                    isCoach ? "text-[#94A3B8]" : "text-white/80"
+                    isCoach ? "text-[#8B90A8]" : "text-white/80"
                   }`}
                 >
                   {msg.timestamp}
@@ -283,7 +283,7 @@ export const CoachChatView: React.FC = () => {
               </div>
 
               {!isCoach && (
-                <div className="h-7 w-7 rounded-lg bg-[#1E293B] flex items-center justify-center text-[#94A3B8] shrink-0 mt-0.5">
+                <div className="h-7 w-7 rounded-lg bg-[#171A2B] border border-[rgba(255,255,255,0.07)] flex items-center justify-center text-[#8B90A8] shrink-0 mt-0.5">
                   <User className="h-4 w-4" />
                 </div>
               )}
@@ -293,13 +293,13 @@ export const CoachChatView: React.FC = () => {
 
         {isSending && (
           <div className="flex items-center gap-3">
-            <div className="h-7 w-7 rounded-lg bg-[#6366F1] flex items-center justify-center text-white shrink-0">
+            <div className="h-7 w-7 rounded-lg bg-[#7C6CFF] flex items-center justify-center text-white shrink-0">
               <BotMessageSquare className="h-4 w-4" />
             </div>
-            <div className="p-3 rounded-xl bg-[#0B1120] border border-[#1E293B] flex items-center gap-1.5 text-xs text-[#94A3B8]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#818CF8] animate-bounce" />
-              <span className="h-1.5 w-1.5 rounded-full bg-[#818CF8] animate-bounce [animation-delay:0.2s]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-[#818CF8] animate-bounce [animation-delay:0.4s]" />
+            <div className="p-3 rounded-xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] flex items-center gap-1.5 text-xs text-[#8B90A8]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#7C6CFF] animate-bounce" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#7C6CFF] animate-bounce [animation-delay:0.2s]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#7C6CFF] animate-bounce [animation-delay:0.4s]" />
               <span className="text-[11px] ml-1">AI Coach is thinking...</span>
             </div>
           </div>
@@ -309,15 +309,15 @@ export const CoachChatView: React.FC = () => {
       </div>
 
       {/* Quick Prompts */}
-      <div className="px-4 py-2 bg-[#0B1120] border-t border-[#1E293B] flex items-center gap-2 overflow-x-auto">
-        <span className="text-[10px] font-semibold text-[#94A3B8] uppercase shrink-0">
+      <div className="px-4 py-2 bg-[#0A0B14] border-t border-[rgba(255,255,255,0.07)] flex items-center gap-2 overflow-x-auto">
+        <span className="text-[10px] font-semibold text-[#8B90A8] uppercase shrink-0">
           Quick Prompts:
         </span>
         {quickPrompts.map((qp, idx) => (
           <button
             key={idx}
             onClick={() => handleSend(qp.prompt)}
-            className="text-[11px] whitespace-nowrap px-2.5 py-1 rounded bg-[#151E2E] border border-[#1E293B] hover:border-[#334155] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
+            className="text-[11px] whitespace-nowrap px-2.5 py-1 rounded bg-[#171A2B] border border-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] text-[#8B90A8] hover:text-[#F2F3F8] transition-colors"
           >
             {qp.label}
           </button>
@@ -325,7 +325,7 @@ export const CoachChatView: React.FC = () => {
       </div>
 
       {/* Input Bar */}
-      <div className="p-4 border-t border-[#1E293B] bg-[#151E2E]">
+      <div className="p-4 border-t border-[rgba(255,255,255,0.07)] bg-[#11131F]">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -338,8 +338,8 @@ export const CoachChatView: React.FC = () => {
             onClick={toggleMic}
             className={`p-2.5 rounded-lg border transition-colors ${
               isListening
-                ? "bg-[#EF4444]/20 border-[#EF4444] text-[#EF4444]"
-                : "bg-[#0B1120] border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC]"
+                ? "bg-[#FF6B7A]/20 border-[#FF6B7A] text-[#FF6B7A]"
+                : "bg-[#0A0B14] border-[rgba(255,255,255,0.07)] text-[#8B90A8] hover:text-[#F2F3F8]"
             }`}
             title="Voice input simulation"
           >
@@ -351,13 +351,13 @@ export const CoachChatView: React.FC = () => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Ask your coach anything about concepts, tasks, or pacing..."
-            className="flex-1 px-4 py-2 rounded-lg bg-[#0B1120] border border-[#1E293B] text-xs text-[#F8FAFC] placeholder-[#94A3B8] focus:outline-none focus:border-[#818CF8]"
+            className="flex-1 px-4 py-2 rounded-lg bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-xs text-[#F2F3F8] placeholder-[#8B90A8] focus:outline-none focus:border-[#7C6CFF]"
           />
 
           <button
             type="submit"
             disabled={!inputText.trim() || isSending}
-            className="p-2.5 rounded-lg bg-[#6366F1] hover:bg-[#4F46E5] text-white shadow-sm transition-colors disabled:opacity-50"
+            className="p-2.5 rounded-lg bg-gradient-to-r from-[#7C6CFF] to-[#6352E8] hover:opacity-90 text-white shadow-sm transition-opacity disabled:opacity-50"
           >
             <Send className="h-4 w-4" />
           </button>

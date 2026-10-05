@@ -9,7 +9,6 @@ import {
   CheckCircle,
   ArrowRight,
   RefreshCw,
-  BrainCircuit,
   Zap,
   Share2,
   Copy,
@@ -18,6 +17,7 @@ import {
   Flame,
   Target,
 } from "lucide-react";
+import { LogoIcon } from "@/components/brand/Logo";
 import confetti from "canvas-confetti";
 
 export const WeeklyReviewView: React.FC = () => {
@@ -37,7 +37,7 @@ export const WeeklyReviewView: React.FC = () => {
         particleCount: 50,
         spread: 60,
         origin: { y: 0.6 },
-        colors: ["#6366F1", "#38BDF8", "#10B981"],
+        colors: ["#7C6CFF", "#4F8BFF", "#3DDC97"],
       });
     } catch (e) {}
     setTimeout(() => setIsCopied(false), 3000);
@@ -102,32 +102,32 @@ export const WeeklyReviewView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-2xl border border-[#1E293B] p-6 bg-gradient-to-r from-[#151E2E] to-[#0B1120]">
+      <div className="rounded-2xl border border-[rgba(255,255,255,0.07)] p-6 bg-gradient-to-r from-[#11131F] to-[#0A0B14]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#818CF8]/20 border border-[#818CF8]/30 text-[#818CF8] text-[10px] font-bold uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#7C6CFF]/20 border border-[#7C6CFF]/30 text-[#7C6CFF] text-[10px] font-bold uppercase tracking-wider">
                 Automated Retrospective
               </span>
-              <span className="text-[#94A3B8] text-xs">• Weekly AI Review</span>
+              <span className="text-[#8B90A8] text-xs">• Weekly AI Review</span>
             </div>
-            <h2 className="text-xl font-extrabold text-[#F8FAFC]">
+            <h2 className="text-xl font-extrabold text-[#F2F3F8]">
               {activeGoal?.title || "Mastery Track"} Retrospective
             </h2>
-            <p className="text-xs text-[#94A3B8] mt-1">
-              Goal Focus: <span className="text-[#818CF8] font-medium">{activeGoal?.title}</span>
+            <p className="text-xs text-[#8B90A8] mt-1">
+              Goal Focus: <span className="text-[#7C6CFF] font-medium">{activeGoal?.title}</span>
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="px-3.5 py-2 rounded-xl bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] text-xs font-bold flex items-center gap-2">
+            <span className="px-3.5 py-2 rounded-xl bg-[#3DDC97]/15 border border-[#3DDC97]/30 text-[#3DDC97] text-xs font-bold flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
               <span>{hitRate}% Completion</span>
             </span>
 
             <button
               onClick={() => setIsShareModalOpen(true)}
-              className="px-3.5 py-2 rounded-xl bg-[#818CF8]/20 hover:bg-[#818CF8]/30 border border-[#818CF8]/40 text-[#818CF8] text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-[#7C6CFF]/20 hover:bg-[#7C6CFF]/30 border border-[#7C6CFF]/40 text-[#7C6CFF] text-xs font-semibold flex items-center gap-1.5 transition-colors"
             >
               <Share2 className="h-3.5 w-3.5" />
               <span>Share Card</span>
@@ -136,10 +136,10 @@ export const WeeklyReviewView: React.FC = () => {
             <button
               onClick={handleRefreshReview}
               disabled={isRefreshing}
-              className="px-3 py-2 rounded-xl bg-[#151E2E] border border-[#1E293B] hover:border-[#818CF8] text-[#94A3B8] hover:text-[#F8FAFC] text-xs font-medium flex items-center gap-1.5 transition-all disabled:opacity-50"
+              className="px-3 py-2 rounded-xl bg-[#11131F] border border-[rgba(255,255,255,0.07)] hover:border-[#7C6CFF] text-[#8B90A8] hover:text-[#F2F3F8] text-xs font-medium flex items-center gap-1.5 transition-all disabled:opacity-50"
               title="Generate fresh AI insights"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-[#818CF8]" : "text-[#94A3B8]"}`} />
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-[#7C6CFF]" : "text-[#8B90A8]"}`} />
               <span>{isRefreshing ? "Re-evaluating..." : "Re-evaluate"}</span>
             </button>
           </div>
@@ -148,64 +148,62 @@ export const WeeklyReviewView: React.FC = () => {
 
       {/* Top 4 Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl border border-[#1E293B] bg-[#151E2E]">
-          <div className="text-xs text-[#94A3B8] font-medium mb-1">Tasks Completed</div>
-          <div className="text-2xl font-bold text-[#F8FAFC] font-mono">
+        <div className="p-4 rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F]">
+          <div className="text-xs text-[#8B90A8] font-medium mb-1">Tasks Completed</div>
+          <div className="text-2xl font-bold text-[#F2F3F8] font-mono">
             {completedGoalTasks}/{totalGoalTasks}
           </div>
-          <div className="text-[10px] text-[#22C55E] mt-1 font-semibold">
+          <div className="text-[10px] text-[#3DDC97] mt-1 font-semibold">
             {hitRate}% Hit Rate
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border border-[#1E293B] bg-[#151E2E]">
-          <div className="text-xs text-[#94A3B8] font-medium mb-1">Time Invested</div>
-          <div className="text-2xl font-bold text-[#818CF8] font-mono">
+        <div className="p-4 rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F]">
+          <div className="text-xs text-[#8B90A8] font-medium mb-1">Time Invested</div>
+          <div className="text-2xl font-bold text-[#7C6CFF] font-mono">
             {totalHours} hrs
           </div>
-          <div className="text-[10px] text-[#94A3B8] mt-1">
+          <div className="text-[10px] text-[#8B90A8] mt-1">
             Across active sessions
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border border-[#1E293B] bg-[#151E2E]">
-          <div className="text-xs text-[#94A3B8] font-medium mb-1">Top Strength</div>
-          <div className="text-lg font-bold text-[#22C55E] truncate">
+        <div className="p-4 rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F]">
+          <div className="text-xs text-[#8B90A8] font-medium mb-1">Top Strength</div>
+          <div className="text-lg font-bold text-[#3DDC97] truncate">
             {topStrength}
           </div>
-          <div className="text-[10px] text-[#94A3B8] mt-1">
+          <div className="text-[10px] text-[#8B90A8] mt-1">
             High confidence
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border border-[#1E293B] bg-[#151E2E]">
-          <div className="text-xs text-[#94A3B8] font-medium mb-1">Target Weakness</div>
-          <div className="text-lg font-bold text-[#EF4444] truncate">
+        <div className="p-4 rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#11131F]">
+          <div className="text-xs text-[#8B90A8] font-medium mb-1">Target Weakness</div>
+          <div className="text-lg font-bold text-[#FF6B7A] truncate">
             {targetWeakness}
           </div>
-          <div className="text-[10px] text-[#EF4444]/80 mt-1">
+          <div className="text-[10px] text-[#FF6B7A]/80 mt-1">
             Targeted for drills
           </div>
         </div>
       </div>
 
       {/* AI Executive Summary Card */}
-      <div className="rounded-2xl glass-panel border border-primary-500/30 bg-surface/90 p-6 shadow-xl relative">
+      <div className="rounded-2xl glass-panel border border-[#7C6CFF]/30 bg-[#11131F]/90 p-6 shadow-xl relative">
         <div className="flex items-center gap-3 mb-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
-            <BrainCircuit className="h-5 w-5" />
-          </div>
+          <LogoIcon size={36} />
           <div>
-            <h3 className="text-sm font-bold text-white font-heading">
+            <h3 className="text-sm font-bold text-[#F2F3F8] font-heading">
               AI Coach Executive Analysis
             </h3>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-[#8B90A8]">
               Synthesized from daily check-ins, velocity, and error patterns
             </p>
           </div>
         </div>
 
-        <div className="text-xs text-slate-200 leading-relaxed p-4 rounded-xl bg-surfaceLight/50 border border-surfaceBorder whitespace-pre-line">
+        <div className="text-xs text-[#F2F3F8] leading-relaxed p-4 rounded-xl bg-[#171A2B]/70 border border-[rgba(255,255,255,0.07)] whitespace-pre-line">
           {currentSummary}
         </div>
       </div>
@@ -213,18 +211,18 @@ export const WeeklyReviewView: React.FC = () => {
       {/* Wins & Next Week Roadmap Calibration */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Key Wins */}
-        <div className="rounded-2xl glass-panel border border-surfaceBorder bg-surface/80 p-5">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Award className="h-4 w-4 text-amber-400" />
+        <div className="rounded-2xl glass-panel border border-[rgba(255,255,255,0.07)] bg-[#11131F] p-5">
+          <h3 className="text-xs font-bold text-[#F2F3F8] uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Award className="h-4 w-4 text-[#F5B544]" />
             <span>Key Breakthroughs & Wins</span>
           </h3>
           <ul className="space-y-2.5">
             {weeklyReview.keyWins.map((win, idx) => (
               <li
                 key={idx}
-                className="flex items-start gap-2.5 p-3 rounded-xl bg-surfaceLight/40 border border-surfaceBorder/60 text-xs text-slate-200"
+                className="flex items-start gap-2.5 p-3 rounded-xl bg-[#171A2B]/40 border border-[rgba(255,255,255,0.05)] text-xs text-[#F2F3F8]"
               >
-                <CheckCircle className="h-4 w-4 text-accent-emerald shrink-0 mt-0.5" />
+                <CheckCircle className="h-4 w-4 text-[#3DDC97] shrink-0 mt-0.5" />
                 <span>{win}</span>
               </li>
             ))}
@@ -232,18 +230,18 @@ export const WeeklyReviewView: React.FC = () => {
         </div>
 
         {/* Next Week's AI Adapted Plan */}
-        <div className="rounded-2xl border border-[#1E293B] bg-[#151E2E] p-5">
-          <h3 className="text-xs font-bold text-[#F8FAFC] uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#818CF8]" />
+        <div className="rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[#11131F] p-5">
+          <h3 className="text-xs font-bold text-[#F2F3F8] uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[#7C6CFF]" />
             <span>Next Week's Adaptive Adjustments</span>
           </h3>
           <ul className="space-y-2.5">
             {weeklyReview.nextWeekFocus.map((focus, idx) => (
               <li
                 key={idx}
-                className="flex items-start gap-2.5 p-3 rounded-xl bg-[#0B1120] border border-[#1E293B] text-xs text-[#CBD5E1]"
+                className="flex items-start gap-2.5 p-3 rounded-xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-xs text-[#8B90A8]"
               >
-                <ArrowRight className="h-4 w-4 text-[#818CF8] shrink-0 mt-0.5" />
+                <ArrowRight className="h-4 w-4 text-[#7C6CFF] shrink-0 mt-0.5" />
                 <span>{focus}</span>
               </li>
             ))}
@@ -254,63 +252,63 @@ export const WeeklyReviewView: React.FC = () => {
       {/* Shareable Retrospective Card Modal */}
       {isShareModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-2xl bg-[#0B1120] border border-[#1E293B] shadow-2xl p-6 space-y-5">
+          <div className="relative w-full max-w-lg rounded-2xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] shadow-2xl p-6 space-y-5">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
+            <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.07)] pb-3">
               <div className="flex items-center gap-2">
-                <Share2 className="h-4 w-4 text-[#818CF8]" />
-                <h3 className="text-sm font-bold text-[#F8FAFC]">
+                <Share2 className="h-4 w-4 text-[#7C6CFF]" />
+                <h3 className="text-sm font-bold text-[#F2F3F8]">
                   Share Weekly Accomplishment Card
                 </h3>
               </div>
               <button
                 onClick={() => setIsShareModalOpen(false)}
-                className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#151E2E] transition-colors"
+                className="p-1.5 rounded-lg text-[#8B90A8] hover:text-[#F2F3F8] hover:bg-[#171A2B] transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             {/* Visual Card Preview */}
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-[#151E2E] via-[#0B1120] to-[#1E1B4B] border-2 border-[#818CF8]/40 shadow-xl space-y-4">
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-[#11131F] via-[#0A0B14] to-[#171A2B] border-2 border-[#7C6CFF]/40 shadow-xl space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-[#6366F1] to-[#818CF8] flex items-center justify-center text-white font-bold text-xs">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-[#7C6CFF] to-[#4F8BFF] flex items-center justify-center text-white font-bold text-xs">
                     S
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-[#F8FAFC]">Saathi AI Retrospective</h4>
-                    <span className="text-[10px] text-[#94A3B8]">{userProfile.name} • Level {userProfile.level}</span>
+                    <h4 className="text-xs font-bold text-[#F2F3F8]">Saathi AI Retrospective</h4>
+                    <span className="text-[10px] text-[#8B90A8]">{userProfile.name} • Level {userProfile.level}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F59E0B]/20 text-[#F59E0B] text-xs font-bold border border-[#F59E0B]/30">
-                  <Flame className="h-3.5 w-3.5 fill-[#F59E0B]" />
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F5B544]/20 text-[#F5B544] text-xs font-bold border border-[#F5B544]/30">
+                  <Flame className="h-3.5 w-3.5 fill-[#F5B544]" />
                   <span>{userProfile.streakDays} Day Streak</span>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[#0B1120]/80 border border-[#1E293B]">
-                <div className="text-[11px] font-semibold text-[#818CF8] mb-0.5">Focus Goal</div>
-                <div className="text-sm font-bold text-[#F8FAFC]">{activeGoal?.title || "Focus Mission"}</div>
+              <div className="p-3.5 rounded-xl bg-[#0A0B14]/80 border border-[rgba(255,255,255,0.07)]">
+                <div className="text-[11px] font-semibold text-[#7C6CFF] mb-0.5">Focus Goal</div>
+                <div className="text-sm font-bold text-[#F2F3F8]">{activeGoal?.title || "Focus Mission"}</div>
               </div>
 
               <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="p-2.5 rounded-lg bg-[#151E2E] border border-[#1E293B]">
-                  <div className="text-[10px] text-[#94A3B8]">Consistency</div>
-                  <div className="text-base font-bold text-[#22C55E]">{weeklyReview.consistencyScorePercent}%</div>
+                <div className="p-2.5 rounded-lg bg-[#11131F] border border-[rgba(255,255,255,0.07)]">
+                  <div className="text-[10px] text-[#8B90A8]">Consistency</div>
+                  <div className="text-base font-bold text-[#3DDC97]">{weeklyReview.consistencyScorePercent}%</div>
                 </div>
-                <div className="p-2.5 rounded-lg bg-[#151E2E] border border-[#1E293B]">
-                  <div className="text-[10px] text-[#94A3B8]">Tasks Done</div>
-                  <div className="text-base font-bold text-[#F8FAFC]">{weeklyReview.tasksCompleted}/{weeklyReview.tasksTotal}</div>
+                <div className="p-2.5 rounded-lg bg-[#11131F] border border-[rgba(255,255,255,0.07)]">
+                  <div className="text-[10px] text-[#8B90A8]">Tasks Done</div>
+                  <div className="text-base font-bold text-[#F2F3F8]">{weeklyReview.tasksCompleted}/{weeklyReview.tasksTotal}</div>
                 </div>
-                <div className="p-2.5 rounded-lg bg-[#151E2E] border border-[#1E293B]">
-                  <div className="text-[10px] text-[#94A3B8]">Focus Hours</div>
-                  <div className="text-base font-bold text-[#818CF8]">{weeklyReview.totalHoursSpent}h</div>
+                <div className="p-2.5 rounded-lg bg-[#11131F] border border-[rgba(255,255,255,0.07)]">
+                  <div className="text-[10px] text-[#8B90A8]">Focus Hours</div>
+                  <div className="text-base font-bold text-[#7C6CFF]">{weeklyReview.totalHoursSpent}h</div>
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-[#0B1120]/60 border border-[#1E293B] text-xs text-[#CBD5E1] flex items-start gap-2">
-                <Award className="h-4 w-4 text-[#F59E0B] shrink-0 mt-0.5" />
+              <div className="p-3 rounded-lg bg-[#0A0B14]/60 border border-[rgba(255,255,255,0.07)] text-xs text-[#8B90A8] flex items-start gap-2">
+                <Award className="h-4 w-4 text-[#F5B544] shrink-0 mt-0.5" />
                 <span><strong>Top Breakthrough:</strong> {weeklyReview.keyWins[0]}</span>
               </div>
             </div>
@@ -319,13 +317,13 @@ export const WeeklyReviewView: React.FC = () => {
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 onClick={() => setIsShareModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#151E2E] transition-colors"
+                className="px-4 py-2 rounded-xl text-xs font-medium text-[#8B90A8] hover:text-[#F2F3F8] hover:bg-[#171A2B] transition-colors"
               >
                 Close
               </button>
               <button
                 onClick={handleCopyShareCard}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#818CF8] hover:from-[#4F46E5] hover:to-[#6366F1] text-white font-semibold text-xs shadow-lg shadow-[#6366F1]/25 transition-all"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#7C6CFF] to-[#6352E8] hover:opacity-90 text-white font-semibold text-xs shadow-lg shadow-[#7C6CFF]/25 transition-opacity"
               >
                 {isCopied ? (
                   <>

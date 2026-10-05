@@ -111,12 +111,26 @@ ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.checkins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ai_insights ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow individual read" ON public.profiles;
 CREATE POLICY "Allow individual read" ON public.profiles FOR SELECT USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Allow individual update" ON public.profiles;
 CREATE POLICY "Allow individual update" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Allow individual insert" ON public.profiles;
 CREATE POLICY "Allow individual insert" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Allow goal access" ON public.goals;
 CREATE POLICY "Allow goal access" ON public.goals FOR ALL USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Allow milestone access" ON public.milestones;
 CREATE POLICY "Allow milestone access" ON public.milestones FOR ALL USING (EXISTS (SELECT 1 FROM public.goals WHERE public.goals.id = milestones.goal_id AND public.goals.user_id = auth.uid()));
+
+DROP POLICY IF EXISTS "Allow task access" ON public.tasks;
 CREATE POLICY "Allow task access" ON public.tasks FOR ALL USING (EXISTS (SELECT 1 FROM public.goals WHERE public.goals.id = tasks.goal_id AND public.goals.user_id = auth.uid()));
+
+DROP POLICY IF EXISTS "Allow checkin access" ON public.checkins;
 CREATE POLICY "Allow checkin access" ON public.checkins FOR ALL USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Allow ai insight access" ON public.ai_insights;
 CREATE POLICY "Allow ai insight access" ON public.ai_insights FOR ALL USING (auth.uid() = user_id);
