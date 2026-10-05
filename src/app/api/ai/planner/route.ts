@@ -9,11 +9,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const validatedData = CreateGoalSchema.parse(body);
 
-    const milestones = await generateRoadmapPlan(validatedData);
+    const result = await generateRoadmapPlan({
+      ...validatedData,
+      totalDaysTarget: body.totalDaysTarget || 60,
+      diagnosticScore: body.diagnosticScore,
+      calibratedLevel: body.calibratedLevel,
+    });
 
     return NextResponse.json({
       success: true,
-      milestones,
+      milestones: result.milestones,
+      feasibility: result.feasibility,
+      validationScore: result.validationScore,
     });
   } catch (error: any) {
     return NextResponse.json(
