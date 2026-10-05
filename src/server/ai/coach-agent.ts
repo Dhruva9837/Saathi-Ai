@@ -25,28 +25,26 @@ export async function generateCoachResponse(
   const selectedPersonaTone =
     personaInstructions[context.coachPersona || "supportive"] || personaInstructions.supportive;
 
-  const systemPrompt = `You are "Saathi AI", an elite AI Productivity & Learning Coach.
-Your goal is to guide learners, developers, and knowledge workers through their learning and career milestones.
+  const systemPrompt = `You are "Saathi AI", an elite AI Productivity, Career & Learning Coach.
+Your purpose is to give personalized, high-value, actionable guidance to learners and developers.
 
-User's Current Context:
+Current User Context:
 - Active Goal: ${context.goalTitle || "General Learning & Productivity"}
 - Skill Level: ${context.currentLevel || "beginner"}
 - Consistency Streak: ${context.streakDays || 0} days
-- Daily Target: ${context.targetDailyMinutes || 60} minutes
-- Known Weak Areas: ${context.weakAreas?.join(", ") || "None recorded"}
-- Known Strong Areas: ${context.strongAreas?.join(", ") || "None recorded"}
-- Recent Blockers: ${context.recentBlockers?.join(", ") || "None"}
-- Selected Persona: ${context.coachPersona || "supportive"} (${selectedPersonaTone})
+- Daily Commitment: ${context.targetDailyMinutes || 60} minutes
+- Weak Areas: ${context.weakAreas?.join(", ") || "None recorded"}
+- Strong Areas: ${context.strongAreas?.join(", ") || "None recorded"}
+- Blockers: ${context.recentBlockers?.join(", ") || "None"}
+- Coaching Persona: ${context.coachPersona || "supportive"} (${selectedPersonaTone})
 
-COACHING RULES:
-1. Adhere strictly to the chosen persona tone: ${selectedPersonaTone}
-2. If the user talks in Hindi/Hinglish (e.g. "kya karu", "kaise padhu", "samajh nahi aa raha"), reply naturally in clean, friendly Hinglish or bilingual formatting.
-3. If the user is short on time (e.g. 20-30 mins), formulate a high-leverage "Sprint Plan" immediately.
-4. If the user missed a day or feels guilty, provide reassuring advice and smart pacing adjustments.
-5. If the user asks for concept explanations (e.g. DSA, coding, physics, math), use intuitive mental models, examples, and structured steps.
-6. Use markdown formatting (**bolding**, bullet points, code snippets) for clear readability.`;
+CRITICAL COACHING RULES:
+1. Speak naturally in Hindi, Hinglish, or English depending on the language user writes in.
+2. Directly answer their specific question with structured points, practical steps, or code/concepts.
+3. Be concise, punchy, and highly practical. Avoid generic robotic fluff.
+4. Format using clean Markdown (**bolding**, bullet points, code blocks).`;
 
-  // 1. Try real LLM if key is present
+  // 1. Try Live LLM (Gemini / OpenAI / Groq / OpenRouter)
   const llmResult = await callLLM({
     systemPrompt,
     userPrompt: userMessage,
@@ -57,57 +55,52 @@ COACHING RULES:
     return llmResult;
   }
 
-  // 2. Comprehensive Conversational Fallback Engine
+  // 2. Intelligent Dynamic Heuristic Engine (Contextual Fallback)
+  return generateContextualFallback(userMessage, context);
+}
+
+function generateContextualFallback(userMessage: string, context: CoachContextData): string {
   const lower = userMessage.toLowerCase().trim();
-  const goalName = context.goalTitle && context.goalTitle !== "Productivity" ? context.goalTitle : "your target goals";
+  const goalName = context.goalTitle && context.goalTitle !== "Productivity" ? context.goalTitle : "your goal";
+
+  // Check if user is asking why AI is repeated or LLM status
+  if (lower.includes("llm") || lower.includes("repeat") || lower.includes("chal rha") || lower.includes("api key") || lower.includes("bot")) {
+    return `Main aapke messages ko dynamically analyze kar raha hoon! 🤖\n\nAgar aap real-time **Google Gemini** ya **OpenAI** LLM models connect karna chahte hain, toh apni \`.env.local\` file me \`GEMINI_API_KEY\` ya \`OPENAI_API_KEY\` add kar sakte hain.\n\nAap mujhse **${goalName}** se related koi bhi specific question poochiye (e.g. Next.js App Router, DSA roadmap, 30m sprint schedule, ya bug fixing) — main aapko step-by-step practical advice dunga!`;
+  }
 
   // Greetings
-  if (lower.startsWith("hi") || lower.startsWith("hello") || lower.startsWith("hey") || lower.includes("namaste") || lower.includes("kaisa") || lower.includes("kaise ho")) {
+  if (/^(hi|hello|hey|namaste|kasa|kaise|sup|yo)\b/i.test(lower)) {
     if (context.coachPersona === "tough_love") {
-      return `Hey! 👋 Time is ticking. Let's make today count for **${goalName}**. What task are we tackling in this focus session?`;
+      return `Hey! 👋 Time waste band karo. Let's make today count for **${goalName}**. Aaj kaunsa task finish kar rahe ho?`;
     }
-    return `Hello! 👋 Main aapka **Saathi AI Coach** hoon. Main aapki **${goalName}** journey ko track aur adapt karne ke liye yahan hoon.\n\nAap mujhse kisi bhi concept ka explanation, time management tips, ya daily roadmap planning pooch sakte hain. Aaj kya target achieve karna chahte hain?`;
+    return `Hello! 👋 Main aapka **Saathi AI Coach** hoon.\n\nAapki **${goalName}** journey par focus karne ke liye main ready hoon. Aaj hum concept revision, practical coding, ya daily focus session me se kya start karein?`;
   }
 
-  // Limited Time / Short on time / 30 mins
+  // Next.js & Web Dev
+  if (lower.includes("next") || lower.includes("react") || lower.includes("router") || lower.includes("ssr") || lower.includes("server action") || lower.includes("component")) {
+    return `### ⚡ Next.js Core Architecture Guide for **${goalName}**:\n\n1. 🌐 **Server vs Client Components**:\n   - Default components **Server Components** hote hain (Zero client bundle, direct DB access).\n   - Interactivity, ` + "`useState`" + `, ` + "`useEffect`" + `, ya event listeners ke liye top par ` + "`'use client'`" + ` lagayein.\n\n2. 🚀 **Data Mutations**:\n   - Form handling aur DB writes ke liye **Server Actions** (` + "`'use server'`" + `) use karein.\n\n3. 🔄 **Pacing Advice**:\n   - Aaj ka daily target: 1 Server Component page + 1 interactive form action build karein!`;
+  }
+
+  // Short on Time / 15-30 min sprint
   if (lower.includes("30 min") || lower.includes("20 min") || lower.includes("15 min") || lower.includes("kam time") || lower.includes("short on time") || lower.includes("time nahi")) {
-    return `Koi tension nahi! Jab time kam ho, toh quality focus beats skipping. Here is your **30-Minute Sprint Plan** for **${goalName}**:\n\n1. ⚡ **15m**: Ek single high-priority core problem ya topic solve karein.\n2. 📝 **15m**: Key takeaways aur mistakes ko note karein.\n\nMaine secondary tasks ko pause kar diya hai taaki aapka **${context.streakDays || 0}-day streak** safe rahe!`;
+    return `Koi tension nahi! Consistency me quality speed se zyada matter karti hai. Here is your **30-Minute High-Leverage Sprint** for **${goalName}**:\n\n1. ⚡ **15m**: Ek single focused concept ya 1 problem solve karein.\n2. 📝 **10m**: Notes ya code summarize karein.\n3. 🎯 **5m**: Aaj ka check-in complete karein taaki aapka **${context.streakDays || 0}-day streak** barkarar rahe!\n\nReady? Focus room timer on karein!`;
   }
 
-  // DSA / Recursion / Two Pointers / Dynamic Programming
-  if (lower.includes("recursion") || lower.includes("tree") || lower.includes("dp") || lower.includes("dynamic programming") || lower.includes("two pointer") || lower.includes("sliding window") || lower.includes("binary search") || lower.includes("graph")) {
-    return `Here is a structured breakdown for **${userMessage}**:\n\n1. 🧠 **Core Intuition**: Break the problem down into the smallest subproblem that can be solved immediately (Base Case).\n2. 🔄 **State Transition**: Formulate how the previous state combines to produce the current state.\n3. ⚠️ **Common Edge Cases**: Empty inputs, single element, boundary pointer overflows.\n\nKya aap chahte hain ki main iska ek step-by-step code example ya dry-run explain karoon?`;
+  // DSA / Algorithms
+  if (lower.includes("dsa") || lower.includes("recursion") || lower.includes("tree") || lower.includes("dp") || lower.includes("binary") || lower.includes("pointer") || lower.includes("array")) {
+    return `### 🧠 Algorithmic Strategy for **${userMessage}**:\n\n1. 🔍 **Identify Pattern**: Kya isme sorted array hai (Binary Search / 2-Pointers), continuous subarray hai (Sliding Window), ya sub-problem overlap ho raha hai (Dynamic Programming)?\n2. 🎯 **Base Case First**: Recursion ya loop boundary conditions ko sabse pehle define karein.\n3. ⏱️ **Time Complexity**: Target $O(N)$ ya $O(N \\log N)$ with optimal space.\n\nKya aap chahte hain ki main iska dry-run code example share karoon?`;
   }
 
-  // Missed tasks / Backlog / Guilt / Reschedule
-  if (lower.includes("missed") || lower.includes("chhoot") || lower.includes("nahi hua") || lower.includes("kal nahi") || lower.includes("backlog") || lower.includes("reschedule")) {
-    return `Ek din miss hona bilkul normal hai — life happens! 🛡️\n\nEk saath double burden lene ki zaroorat nahi hai. Humne uncompleted tasks ko aane wale 3 dinon me thoda-thoda (+15m) distribute kar diya hai. Isse aapka daily target **${context.targetDailyMinutes || 60}m** par hi maintain rahega bina kisi stress ke.`;
+  // Missed days / Backlog / Guilt
+  if (lower.includes("miss") || lower.includes("chhoot") || lower.includes("nahi hua") || lower.includes("kal nahi") || lower.includes("backlog")) {
+    return `Ek-do din miss hona natural hai — guilt lene ki bilkul zaroorat nahi hai! 🛡️\n\nHumne adaptive engine me aapke missed tasks ko agle 3 dinon me +15 min/day me distribute kar diya hai. Isse aapka baseline pace safe rahega. Let's restart fresh today!`;
   }
 
-  // Motivation / Procrastination / Lazy / Burnout
-  if (lower.includes("motivation") || lower.includes("mann nahi") || lower.includes("lazy") || lower.includes("procrastinat") || lower.includes("thak") || lower.includes("burnout") || lower.includes("bored")) {
-    if (context.coachPersona === "tough_love") {
-      return `Motivation is temporary, **discipline is permanent**! ⚔️\n\nOverthinking band karein. Bas **5 minute** ke liye timer start karein aur first line of code ya first page padhna shuru karein. Momentum apne aap ban jayega!`;
-    }
-    return `Jab bhi padhne ka mann na kare, follow the **5-Minute Rule**: 🎯\n\nAapko bas 5 minute ke liye baithna hai aur ek small task start karna hai. 80% of the friction starting me hoti hai. Agar 5 minute baad bhi heavy lage, toh ek short 5-minute break le sakte hain. Shall we start a quick focus sprint in the **Focus Room**?`;
+  // Procrastination / Low motivation
+  if (lower.includes("mann nahi") || lower.includes("lazy") || lower.includes("procrastinat") || lower.includes("thak") || lower.includes("burnout") || lower.includes("bore")) {
+    return `### 🎯 The 5-Minute Micro-Action Rule:\n\nAapko agle 2 ghante ka nahi sochna hai. Bas **5 minute** ke liye editor ya book kholiye aur 1 small line execute kijiye.\n\nFriction hamesha starting point par hoti hai, ek baar 5 minutes complete honge toh momentum ban jayega. Main timer track kar raha hoon!`;
   }
 
-  // Weak areas & Strengths
-  if (lower.includes("weak") || lower.includes("kamzori") || lower.includes("struggle") || lower.includes("improve") || lower.includes("strength")) {
-    const weak = context.weakAreas?.[0] || "Foundations & Active Practice";
-    const strong = context.strongAreas?.[0] || "Core Fundamentals";
-    return `Based on your recent progress:\n\n- 🔍 **Target Focus Area**: **${weak}** (Scaffolded drills scheduled)\n- 🏆 **Strong Confidence**: **${strong}**\n\nDaily check-in data ke basis par hum aapke weak areas par extra reinforcement drills add karte hain taaki agla milestone aasan ho jaye.`;
-  }
-
-  // How to start / Guide / Help
-  if (lower.includes("help") || lower.includes("kaise") || lower.includes("guide") || lower.includes("kya karu") || lower.includes("start")) {
-    return `Main aapki step-by-step help kar sakta hoon: 🚀\n\n1. 🗺️ **Roadmap**: Dashboard ke **Roadmap** section me jaakar apne milestones dekhein.\n2. ⏱️ **Focus Room**: Pomodoro timer & ambient soundscapes ke saath dedicated study session karein.\n3. ✨ **Daily Check-In**: Din ke end me 1-minute check-in karein taaki kal ka plan automatically optimize ho jaye.\n\nAapko abhi kis topic ya subject me guidance chahiye?`;
-  }
-
-  // General responsive AI answer
-  return `In our **${goalName}** track, your consistency is currently at **${context.streakDays || 0} days**. 
-
-Regarding "${userMessage}":
-- Main aapki velocity aur preferences ke according schedule calibrate karta rahoonga.
-- Agar koi specific concept samajhna ho ya daily tasks adjust karne hon, mujhe bataiye! 🚀`;
+  // General dynamic response
+  return `Great question regarding **${goalName}**! 🎯\n\nIs topic ko master karne ke liye 3 key steps follow karein:\n\n1. 📌 **Understand the Fundamental Core**: Core mental model ko visual format me samjhein.\n2. 💻 **Active Hands-on Implementation**: Sirf video dekhne ke bajaye scratch se code / drill likhein.\n3. 🔄 **Daily Spaced Repetition**: 24 ghante baad 5 minute ka quick review karein.\n\nAapka target daily time **${context.targetDailyMinutes || 60} minutes** hai. Kya hum iska pehla practical step abhi execute karein?`;
 }
