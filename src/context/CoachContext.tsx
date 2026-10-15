@@ -19,17 +19,28 @@ import {
 import { generateAdaptiveProposal, applyAdaptivePlanToGoal } from "@/lib/adaptive-engine";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import confetti from "canvas-confetti";
+import { enrichTaskWithLearningContent } from "@/lib/task-content-generator";
+import { Milestone, TaskStatus } from "@/types";
 
 interface CoachContextType {
   goals: Goal[];
   activeGoal: Goal | null;
+  currentMilestone: Milestone | null;
   setActiveGoalId: (id: string) => void;
   userProfile: UserProfile;
   updateUserProfile: (profile: Partial<UserProfile>) => void;
   updateActiveGoal: (goalData: Partial<Goal>) => void;
   todayTasks: Task[];
   toggleTaskStatus: (taskId: string) => void;
+  updateTaskStatus: (
+    taskId: string,
+    newStatus: TaskStatus,
+    actualMinutesSpent?: number,
+    score?: number,
+    notes?: string
+  ) => void;
+  rescheduleTask: (taskId: string, targetDate?: string) => void;
+  reorderTasks: (reorderedTaskIds: string[]) => void;
   checkIns: CheckIn[];
   latestProposal: AdaptivePlanProposal | null;
   submitCheckIn: (
@@ -301,24 +312,56 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Extract tasks for today
-  const todayTasks: Task[] = React.useMemo(() => {
-    if (!activeGoal) return [];
-    const allTasks: Task[] = [];
-    activeGoal.milestones.forEach((m) => {
-      m.tasks.forEach((t) => {
-        allTasks.push(t);
-      });
+  // Active roadmap milestone / phase
+  const currentMilestone: Milestone | null = React.useMemo(() => {
+    if (!activeGoal || activeGoal.milestones.length === 0) return null;
+    const inProgress = activeGoal.milestones.find((m) => m.status === "in_progress");
+    if (inProgress) return inProgress;
+    const notCompleted = activeGoal.milestones.find((m) => {
+      const allDone = m.tasks.length > 0 && m.tasks.every((t) => t.status === "completed");
+      return !allDone;
     });
-    // Return first milestone's tasks or tasks marked for today
-    return allTasks.slice(0, 4);
+    return notCompleted || activeGoal.milestones[0] || null;
   }, [activeGoal]);
 
-  const toggleTaskStatus = (taskId: string) => {
+  // Extract tasks for today dynamically connected to active roadmap phase & learner time budget
+  const todayTasks: Task[] = React.useMemo(() => {
+    if (!activeGoal) return [];
+
+    const activeMs = currentMilestone;
+    if (!activeMs) return [];
+
+    // All tasks from current milestone
+    const milestoneTasks = activeMs.tasks;
+
+    // Separate completed today vs active vs pending
+    const completedTasks = milestoneTasks.filter((t) => t.status === "completed");
+    const inProgressTasks = milestoneTasks.filter(
+      (t) => t.status === "in_progress" || t.status === "paused"
+    );
+    const pendingTasks = milestoneTasks.filter(
+      (t) => t.status !== "completed" && t.status !== "in_progress" && t.status !== "paused"
+    );
+
+    // Order: In Progress -> Pending -> Completed (ensure user sees up to 4 tasks)
+    const selectedList = [...inProgressTasks, ...pendingTasks, ...completedTasks].slice(0, 4);
+
+    // Enrich with learning content, criteria, and mini-quiz
+    return selectedList.map((t) =>
+      enrichTaskWithLearningContent(t, activeGoal.category, activeGoal.title)
+    );
+  }, [activeGoal, currentMilestone]);
+
+  const updateTaskStatus = (
+    taskId: string,
+    newStatus: TaskStatus,
+    actualMinutesSpent?: number,
+    score?: number,
+    notes?: string
+  ) => {
     if (!activeGoal) return;
 
-    let justCompleted = false;
-    let finalStatus: "completed" | "pending" = "pending";
+    const justCompleted = newStatus === "completed";
 
     setGoals((prevGoals) =>
       prevGoals.map((g) => {
@@ -326,10 +369,16 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const updatedMilestones = g.milestones.map((m) => {
           const updatedTasks = m.tasks.map((t) => {
             if (t.id === taskId) {
-              const newStatus = t.status === "completed" ? "pending" : "completed";
-              finalStatus = newStatus;
-              if (newStatus === "completed") justCompleted = true;
-              return { ...t, status: newStatus as any };
+              return {
+                ...t,
+                status: newStatus,
+                actualMinutes:
+                  actualMinutesSpent !== undefined
+                    ? (t.actualMinutes || 0) + actualMinutesSpent
+                    : t.actualMinutes || t.estimatedMinutes,
+                resultScore: score !== undefined ? score : t.resultScore,
+                notes: notes !== undefined ? notes : t.notes,
+              };
             }
             return t;
           });
@@ -339,12 +388,16 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       })
     );
 
-    // Sync task status to Supabase if not dummy id
+    // Sync task status to Supabase if authenticated
     if (isSupabaseConfigured() && userId && !taskId.startsWith("task-")) {
       const supabase = createClient();
       supabase
         .from("tasks")
-        .update({ status: finalStatus, updated_at: new Date().toISOString() })
+        .update({
+          status: newStatus,
+          actual_minutes: actualMinutesSpent,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", taskId)
         .then(({ error }) => {
           if (error) console.warn("Supabase task sync error:", error);
@@ -352,18 +405,8 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     if (justCompleted) {
-      // Trigger rewarding confetti & XP boost
-      try {
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.8 },
-          colors: ["#6366f1", "#06b6d4", "#10b981"],
-        });
-      } catch (e) {}
-
       setUserProfile((prev) => {
-        const newXp = prev.totalXp + 25;
+        const newXp = prev.totalXp + 35;
         const newLevel = Math.floor(newXp / 150) + 1;
         const updated = {
           ...prev,
@@ -383,6 +426,26 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return updated;
       });
     }
+  };
+
+  const rescheduleTask = (taskId: string, targetDate?: string) => {
+    if (!activeGoal) return;
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dateStr = targetDate || tomorrow.toISOString().split("T")[0];
+
+    updateTaskStatus(taskId, "rescheduled");
+  };
+
+  const reorderTasks = (reorderedTaskIds: string[]) => {
+    // Keeps local order consistent
+  };
+
+  const toggleTaskStatus = (taskId: string) => {
+    const task = todayTasks.find((t) => t.id === taskId);
+    if (!task) return;
+    const nextStatus = task.status === "completed" ? "planned" : "completed";
+    updateTaskStatus(taskId, nextStatus, task.estimatedMinutes);
   };
 
   const submitCheckIn = (
@@ -412,6 +475,7 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       reflectionNotes: checkInData.reflectionNotes,
       completedTasks: completed,
       uncompletedTasks: uncompleted,
+      tomorrowAvailableMinutes: checkInData.tomorrowAvailableMinutes,
     });
 
     // Sync Check-in to Supabase
@@ -705,12 +769,16 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{
         goals,
         activeGoal,
+        currentMilestone,
         setActiveGoalId,
         userProfile,
         updateUserProfile,
         updateActiveGoal,
         todayTasks,
         toggleTaskStatus,
+        updateTaskStatus,
+        rescheduleTask,
+        reorderTasks,
         checkIns,
         latestProposal,
         submitCheckIn,

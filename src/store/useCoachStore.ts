@@ -80,11 +80,12 @@ export const useCoachStore = create<CoachState>()(
       getTodayTasks: () => {
         const activeGoal = get().getActiveGoal();
         if (!activeGoal) return [];
-        const allTasks: Task[] = [];
-        activeGoal.milestones.forEach((m) => {
-          m.tasks.forEach((t) => allTasks.push(t));
-        });
-        return allTasks.slice(0, 4);
+        const inProgressMs =
+          activeGoal.milestones.find((m) => m.status === "in_progress") ||
+          activeGoal.milestones.find((m) => !m.tasks.every((t) => t.status === "completed")) ||
+          activeGoal.milestones[0];
+        if (!inProgressMs) return [];
+        return inProgressMs.tasks.slice(0, 4);
       },
 
       toggleTaskStatus: (taskId: string) => {

@@ -36,8 +36,11 @@ export const CheckInModal: React.FC = () => {
     activeGoal?.dailyMinutesTarget || 60
   );
   const [difficulty, setDifficulty] = useState<number>(3);
+  const [whatLearned, setWhatLearned] = useState<string>("");
   const [blockers, setBlockers] = useState<string>("");
-  const [reflection, setReflection] = useState<string>("");
+  const [tomorrowMinutes, setTomorrowMinutes] = useState<number>(
+    activeGoal?.dailyMinutesTarget || 60
+  );
   const [mood, setMood] = useState<"great" | "good" | "neutral" | "struggling" | "burnt_out">("good");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generatedProposal, setGeneratedProposal] = useState<AdaptivePlanProposal | null>(null);
@@ -60,9 +63,10 @@ export const CheckInModal: React.FC = () => {
         actualMinutesSpent: actualMinutes,
         perceivedDifficulty: difficulty,
         blockers,
-        reflectionNotes: reflection,
+        reflectionNotes: whatLearned,
         mood,
         confidenceScore: difficulty <= 2 ? 5 : difficulty === 3 ? 4 : 2,
+        tomorrowAvailableMinutes: tomorrowMinutes,
       });
 
       triggerLevelUpConfetti();
@@ -76,7 +80,7 @@ export const CheckInModal: React.FC = () => {
           actualMinutesSpent: actualMinutes,
           perceivedDifficulty: difficulty,
           blockers,
-          reflectionNotes: reflection,
+          reflectionNotes: whatLearned,
           mood,
           confidenceScore: difficulty <= 2 ? 5 : difficulty === 3 ? 4 : 2,
           aiFeedbackSummary: proposal.triggerReason,
@@ -237,19 +241,72 @@ export const CheckInModal: React.FC = () => {
               </div>
             </div>
 
-            {/* Step 3: Natural Language Feedback / Blockers */}
+            {/* Step 3: What did you learn today? */}
             <div>
-              <label className="text-xs font-semibold text-[#F2F3F8] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <MessageSquare className="h-3.5 w-3.5 text-[#7C6CFF]" />
-                <span>What blocked you or went well? (Natural Language)</span>
+              <label className="text-xs font-semibold text-[#F2F3F8] uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-[#3DDC97]" />
+                  <span>3. What did you learn today? (Key Takeaways)</span>
+                </span>
+                <span className="text-[10px] text-[#8B90A8] normal-case">Reflection</span>
+              </label>
+              <textarea
+                value={whatLearned}
+                onChange={(e) => setWhatLearned(e.target.value)}
+                placeholder="e.g. Mastered French common greetings (Bonjour, Bonsoir), learned regular -ER verb conjugations, and practiced 10 minutes of conversational dialogue..."
+                rows={2}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-xs text-[#F2F3F8] placeholder-[#8B90A8] focus:outline-none focus:border-[#7C6CFF]/70 focus:ring-1 focus:ring-[#7C6CFF] resize-none"
+              />
+            </div>
+
+            {/* Step 4: What was difficult or blocked you? */}
+            <div>
+              <label className="text-xs font-semibold text-[#F2F3F8] uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <MessageSquare className="h-3.5 w-3.5 text-[#F5B544]" />
+                  <span>4. What was difficult or caused friction?</span>
+                </span>
+                <span className="text-[10px] text-[#8B90A8] normal-case">Weak Areas / Repeat</span>
               </label>
               <textarea
                 value={blockers}
                 onChange={(e) => setBlockers(e.target.value)}
-                placeholder="e.g. Aaj college ka exam tha toh sirf 30 min mila, ya recursion base condition me confusion hui..."
-                rows={3}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-xs text-[#F2F3F8] placeholder-[#8B90A8] focus:outline-none focus:border-[#7C6CFF]/70 focus:ring-1 focus:ring-[#7C6CFF]"
+                placeholder="e.g. Pronunciation of nasal vowels felt tricky, or time ran short due to college assignments..."
+                rows={2}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-xs text-[#F2F3F8] placeholder-[#8B90A8] focus:outline-none focus:border-[#7C6CFF]/70 focus:ring-1 focus:ring-[#7C6CFF] resize-none"
               />
+            </div>
+
+            {/* Step 5: Tomorrow's Available Study Time */}
+            <div className="space-y-2 p-3.5 rounded-xl bg-[#171A2B]/40 border border-[rgba(255,255,255,0.07)]">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-[#F2F3F8] uppercase tracking-wider flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-[#7C6CFF]" />
+                  <span>5. How much time do you have available tomorrow?</span>
+                </label>
+                <span className="text-xs font-bold text-[#7C6CFF] font-mono">
+                  {tomorrowMinutes} min
+                </span>
+              </div>
+              <div className="grid grid-cols-5 gap-2 pt-1">
+                {[30, 60, 90, 120, 180].map((mins) => (
+                  <button
+                    key={mins}
+                    type="button"
+                    onClick={() => setTomorrowMinutes(mins)}
+                    className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+                      tomorrowMinutes === mins
+                        ? "bg-[#7C6CFF] text-white border-[#7C6CFF] shadow-sm shadow-[#7C6CFF]/30"
+                        : "bg-[#0A0B14] text-[#8B90A8] border-[rgba(255,255,255,0.07)] hover:text-[#F2F3F8]"
+                    }`}
+                  >
+                    {mins}m
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-[#8B90A8] pt-0.5">
+                Saathi AI will automatically balance tomorrow's task volume and reschedule incomplete topics to match your exact availability.
+              </p>
             </div>
 
             {/* Submit Button */}

@@ -8,22 +8,38 @@ export interface AdaptationTrigger {
   reflectionNotes?: string;
   completedTasks: Task[];
   uncompletedTasks: Task[];
+  tomorrowAvailableMinutes?: number;
 }
 
 export function generateAdaptiveProposal(
   goal: Goal,
   trigger: AdaptationTrigger
 ): AdaptivePlanProposal {
-  const { actualMinutes, plannedMinutes, difficultyRating, blockers, uncompletedTasks } = trigger;
+  const {
+    actualMinutes,
+    plannedMinutes,
+    difficultyRating,
+    blockers,
+    uncompletedTasks,
+    tomorrowAvailableMinutes,
+  } = trigger;
   const timeRatio = actualMinutes / Math.max(plannedMinutes, 1);
   const keyChanges: string[] = [];
-  let proposedMinutes = goal.dailyMinutesTarget;
+  let proposedMinutes = tomorrowAvailableMinutes || goal.dailyMinutesTarget;
   let difficultyAdjustment: 'reduced' | 'increased' | 'maintained' = 'maintained';
   let coachEncouragement = "";
   let triggerReason = "";
 
-  // 1. Time-based adaptation
-  if (timeRatio < 0.6) {
+  // 1. Tomorrow Specific Budget if provided by user
+  if (tomorrowAvailableMinutes && tomorrowAvailableMinutes !== goal.dailyMinutesTarget) {
+    proposedMinutes = tomorrowAvailableMinutes;
+    triggerReason = `Custom tomorrow availability specified (${tomorrowAvailableMinutes}m).`;
+    keyChanges.push(
+      `Calibrated tomorrow's workload to your requested ${tomorrowAvailableMinutes} minutes.`
+    );
+  }
+  // Otherwise, time-based adaptation from today's performance
+  else if (timeRatio < 0.6) {
     // Under-capacity (User only had time for <60%)
     proposedMinutes = Math.max(30, Math.round((actualMinutes * 1.1) / 15) * 15);
     triggerReason = `Time constraint detected (${actualMinutes}m invested vs ${plannedMinutes}m planned).`;

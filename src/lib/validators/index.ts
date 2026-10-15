@@ -4,17 +4,34 @@ export const GoalLevelSchema = z.enum(["beginner", "intermediate", "advanced"]);
 export const SchedulePreferenceSchema = z.enum(["morning", "afternoon", "evening", "night", "flexible", "custom"]);
 export const TaskDifficultySchema = z.enum(["easy", "medium", "hard"]);
 export const TaskPrioritySchema = z.enum(["low", "medium", "high"]);
-export const TaskStatusSchema = z.enum(["pending", "in_progress", "completed", "missed", "adapted"]);
+export const TaskTypeSchema = z.enum(["practice", "reading", "quiz", "project", "exercise", "review"]);
+export const TaskStatusSchema = z.enum([
+  "planned",
+  "in_progress",
+  "paused",
+  "review",
+  "completed",
+  "rescheduled",
+  "pending",
+  "missed",
+  "adapted",
+]);
 
 export const CreateTaskSchema = z.object({
   title: z.string().min(3, "Task title must be at least 3 characters"),
   description: z.string().default(""),
   difficulty: TaskDifficultySchema.default("medium"),
   estimatedMinutes: z.number().min(5).max(480).default(30),
-  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  actualMinutes: z.number().optional(),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").optional().default(() => new Date().toISOString().split("T")[0]),
+  status: TaskStatusSchema.default("planned"),
   priority: TaskPrioritySchema.default("medium"),
   topic: z.string().min(1, "Topic is required"),
   tags: z.array(z.string()).default([]),
+  learningObjective: z.string().optional(),
+  taskType: TaskTypeSchema.optional().default("practice"),
+  completionCriteria: z.string().optional(),
+  resultScore: z.number().optional(),
 });
 
 export const CreateMilestoneSchema = z.object({

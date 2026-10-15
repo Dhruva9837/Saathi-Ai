@@ -1,7 +1,35 @@
 export type Difficulty = 'easy' | 'medium' | 'hard';
-export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'missed' | 'adapted';
+export type TaskType = 'practice' | 'reading' | 'quiz' | 'project' | 'exercise' | 'review';
+export type TaskLifecycleStatus = 'planned' | 'in_progress' | 'paused' | 'review' | 'completed' | 'rescheduled';
+export type TaskStatus =
+  | 'planned'
+  | 'in_progress'
+  | 'paused'
+  | 'review'
+  | 'completed'
+  | 'rescheduled'
+  | 'pending'
+  | 'missed'
+  | 'adapted';
+
 export type GoalLevel = 'beginner' | 'intermediate' | 'advanced';
 export type SchedulePreference = 'morning' | 'afternoon' | 'evening' | 'night' | 'flexible' | 'custom';
+
+export interface TaskQuizQuestion {
+  id?: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+export interface TaskStudyMaterial {
+  overview: string;
+  keyPoints: string[];
+  examples?: string[];
+  practicePrompt?: string;
+  miniQuiz?: TaskQuizQuestion[];
+}
 
 export interface Task {
   id: string;
@@ -19,6 +47,13 @@ export interface Task {
   notes?: string;
   wasAdapted?: boolean;
   adaptationReason?: string;
+  // AI Coach Task Workflow Extensions
+  learningObjective?: string;
+  taskType?: TaskType;
+  completionCriteria?: string;
+  resultScore?: number;
+  studyMaterial?: TaskStudyMaterial;
+  scheduledDate?: string;
 }
 
 export interface Milestone {
@@ -65,6 +100,9 @@ export interface CheckIn {
   mood: 'great' | 'good' | 'neutral' | 'struggling' | 'burnt_out';
   confidenceScore: number; // 1 to 5
   aiFeedbackSummary?: string;
+  tomorrowAvailableMinutes?: number;
+  weakTopicsToReview?: string[];
+  completedTopicTakeaways?: string;
 }
 
 export interface AdaptivePlanProposal {
