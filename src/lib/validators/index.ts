@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const GoalLevelSchema = z.enum(["beginner", "intermediate", "advanced"]);
-export const SchedulePreferenceSchema = z.enum(["morning", "afternoon", "evening", "flexible"]);
+export const SchedulePreferenceSchema = z.enum(["morning", "afternoon", "evening", "night", "flexible", "custom"]);
 export const TaskDifficultySchema = z.enum(["easy", "medium", "hard"]);
 export const TaskPrioritySchema = z.enum(["low", "medium", "high"]);
 export const TaskStatusSchema = z.enum(["pending", "in_progress", "completed", "missed", "adapted"]);
@@ -38,6 +38,7 @@ export const CreateGoalSchema = z.object({
   studyDays: z.array(z.string()).optional(),
   learningPreference: z.enum(["videos", "reading", "practice", "projects"]).optional(),
   assessmentMethod: z.enum(["quiz", "project", "mock_test"]).optional(),
+  customStudyTime: z.string().optional(),
 });
 
 export const SubmitCheckInSchema = z.object({

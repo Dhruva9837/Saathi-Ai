@@ -112,7 +112,11 @@ export default function OnboardingPage() {
   // Step 3 Availability & Pacing
   const [durationDays, setDurationDays] = useState(60);
   const [dailyMinutes, setDailyMinutes] = useState(120); // 2 hours default
+  const [isCustomDailyMinutes, setIsCustomDailyMinutes] = useState(false);
   const [schedule, setSchedule] = useState<SchedulePreference>("evening");
+  const [scheduleMode, setScheduleMode] = useState<"preset" | "manual">("preset");
+  const [customStartTime, setCustomStartTime] = useState("19:00");
+  const [customEndTime, setCustomEndTime] = useState("21:00");
   const [studyDays, setStudyDays] = useState<string[]>([
     "mon",
     "tue",
@@ -328,7 +332,8 @@ export default function OnboardingPage() {
           targetDeadline: formattedDeadline,
           currentLevel: calibratedLevel,
           dailyMinutesTarget: dailyMinutes,
-          preferredSchedule: schedule,
+          preferredSchedule: scheduleMode === "manual" ? "custom" : schedule,
+          customStudyTime: scheduleMode === "manual" ? `${customStartTime} - ${customEndTime}` : undefined,
           category: goalCategory,
           totalDaysTarget: durationDays,
           calibratedLevel,
@@ -423,7 +428,8 @@ export default function OnboardingPage() {
       targetDeadline: formattedDeadline,
       currentLevel: calibratedLevel,
       dailyMinutesTarget: dailyMinutes,
-      preferredSchedule: schedule,
+      preferredSchedule: scheduleMode === "manual" ? "custom" : schedule,
+      customStudyTime: scheduleMode === "manual" ? `${customStartTime} - ${customEndTime}` : undefined,
       category: goalCategory as any,
       targetOutcome,
       studyDays,
@@ -816,19 +822,57 @@ export default function OnboardingPage() {
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-[#F2F3F8] flex items-center justify-between">
                     <span>Daily Available Time</span>
-                    <span className="text-[#3DDC97]">{dailyMinutes / 60}h / day</span>
+                    <span className="text-[#3DDC97]">
+                      {dailyMinutes >= 60
+                        ? `${(dailyMinutes / 60).toFixed(dailyMinutes % 60 === 0 ? 0 : 1)}h / day`
+                        : `${dailyMinutes}m / day`}
+                    </span>
                   </label>
-                  <select
-                    value={dailyMinutes}
-                    onChange={(e) => setDailyMinutes(Number(e.target.value))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-xs text-[#F2F3F8] focus:border-[#7C6CFF] focus:outline-none"
-                  >
-                    <option value={45}>45 Minutes / day</option>
-                    <option value={60}>1 Hour / day</option>
-                    <option value={90}>1.5 Hours / day</option>
-                    <option value={120}>2 Hours / day</option>
-                    <option value={180}>3 Hours / day</option>
-                  </select>
+                  {!isCustomDailyMinutes ? (
+                    <div className="flex gap-2">
+                      <select
+                        value={dailyMinutes}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          if (val === -1) {
+                            setIsCustomDailyMinutes(true);
+                          } else {
+                            setDailyMinutes(val);
+                          }
+                        }}
+                        className="flex-1 px-3 py-2.5 rounded-xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-xs text-[#F2F3F8] focus:border-[#7C6CFF] focus:outline-none"
+                      >
+                        <option value={30}>30 Minutes / day</option>
+                        <option value={45}>45 Minutes / day</option>
+                        <option value={60}>1 Hour / day</option>
+                        <option value={90}>1.5 Hours / day</option>
+                        <option value={120}>2 Hours / day</option>
+                        <option value={180}>3 Hours / day</option>
+                        <option value={-1}>✏️ Custom Minutes...</option>
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="15"
+                        max="480"
+                        step="5"
+                        value={dailyMinutes}
+                        onChange={(e) => setDailyMinutes(Math.max(15, Math.min(480, Number(e.target.value) || 15)))}
+                        className="flex-1 px-3 py-2.5 rounded-xl bg-[#0A0B14] border border-[#7C6CFF] text-xs text-[#F2F3F8] focus:outline-none font-semibold"
+                        placeholder="Minutes (e.g. 75)"
+                      />
+                      <span className="text-xs text-[#8B90A8]">mins</span>
+                      <button
+                        type="button"
+                        onClick={() => setIsCustomDailyMinutes(false)}
+                        className="px-2.5 py-2 rounded-xl bg-[#171A2B] hover:bg-[#20243C] text-[11px] text-[#8B90A8] hover:text-[#F2F3F8]"
+                      >
+                        Presets
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -861,25 +905,139 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              {/* Preferred Study Time */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#F2F3F8]">Preferred Study Time</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {(["morning", "afternoon", "evening", "night"] as SchedulePreference[]).map((slot) => (
+              {/* Preferred Study Time (Preset Window vs Manual Clock Timing) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-[#F2F3F8] flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-[#7C6CFF]" />
+                    <span>Preferred Study Time</span>
+                  </label>
+                  <div className="flex items-center gap-1 p-0.5 rounded-lg bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-[10px]">
                     <button
-                      key={slot}
                       type="button"
-                      onClick={() => setSchedule(slot)}
-                      className={`py-2 rounded-xl text-xs font-medium capitalize border transition-all ${
-                        schedule === slot
-                          ? "bg-[#7C6CFF] text-white border-[#7C6CFF]"
-                          : "bg-[#0A0B14] text-[#8B90A8] border-[rgba(255,255,255,0.07)] hover:text-[#F2F3F8]"
+                      onClick={() => setScheduleMode("preset")}
+                      className={`px-2.5 py-1 rounded-md transition-all font-medium ${
+                        scheduleMode === "preset"
+                          ? "bg-[#7C6CFF] text-white"
+                          : "text-[#8B90A8] hover:text-[#F2F3F8]"
                       }`}
                     >
-                      {slot}
+                      Broad Windows
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setScheduleMode("manual")}
+                      className={`px-2.5 py-1 rounded-md transition-all font-medium ${
+                        scheduleMode === "manual"
+                          ? "bg-[#7C6CFF] text-white"
+                          : "text-[#8B90A8] hover:text-[#F2F3F8]"
+                      }`}
+                    >
+                      🕒 Manual Clock Time
+                    </button>
+                  </div>
                 </div>
+
+                {scheduleMode === "preset" ? (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { id: "morning", label: "Morning", sub: "6am - 12pm" },
+                        { id: "afternoon", label: "Afternoon", sub: "12pm - 5pm" },
+                        { id: "evening", label: "Evening", sub: "5pm - 9pm" },
+                        { id: "night", label: "Night", sub: "9pm - 1am" },
+                      ].map((slot) => (
+                        <button
+                          key={slot.id}
+                          type="button"
+                          onClick={() => setSchedule(slot.id as SchedulePreference)}
+                          className={`py-2 px-1 rounded-xl text-center border transition-all ${
+                            schedule === slot.id
+                              ? "bg-[#7C6CFF] text-white border-[#7C6CFF] shadow-sm shadow-[#7C6CFF]/30"
+                              : "bg-[#0A0B14] text-[#8B90A8] border-[rgba(255,255,255,0.07)] hover:text-[#F2F3F8]"
+                          }`}
+                        >
+                          <div className="text-xs font-semibold">{slot.label}</div>
+                          <div className={`text-[9px] mt-0.5 ${schedule === slot.id ? "text-white/80" : "text-[#8B90A8]"}`}>
+                            {slot.sub}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setScheduleMode("manual")}
+                      className="text-[11px] text-[#7C6CFF] hover:text-[#4F8BFF] flex items-center gap-1 transition-colors pt-0.5"
+                    >
+                      <span>Want specific hours? Click here to set exact manual start & end times →</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-[#0A0B14] border border-[#7C6CFF]/30 space-y-3 animate-in fade-in">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-[#F2F3F8]">Select Your Exact Study Window:</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#7C6CFF]/20 text-[#7C6CFF] font-bold border border-[#7C6CFF]/30">
+                        {customStartTime} – {customEndTime}
+                      </span>
+                    </div>
+
+                    {/* From - To Time Pickers */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-[#8B90A8] font-medium">Start Time</label>
+                        <input
+                          type="time"
+                          value={customStartTime}
+                          onChange={(e) => setCustomStartTime(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-[#11131F] border border-[rgba(255,255,255,0.1)] text-xs text-[#F2F3F8] focus:border-[#7C6CFF] focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-[#8B90A8] font-medium">End Time</label>
+                        <input
+                          type="time"
+                          value={customEndTime}
+                          onChange={(e) => setCustomEndTime(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-[#11131F] border border-[rgba(255,255,255,0.1)] text-xs text-[#F2F3F8] focus:border-[#7C6CFF] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Quick Manual Slot Presets */}
+                    <div className="space-y-1.5 pt-1">
+                      <div className="text-[10px] text-[#8B90A8]">Quick Manual Timing Slots:</div>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {[
+                          { label: "06:30 – 08:00 AM (Early Bird)", start: "06:30", end: "08:00", mins: 90 },
+                          { label: "02:00 – 03:30 PM (Afternoon Focus)", start: "14:00", end: "15:30", mins: 90 },
+                          { label: "07:00 – 09:00 PM (Prime Evening)", start: "19:00", end: "21:00", mins: 120 },
+                          { label: "10:00 – 11:30 PM (Night Sprint)", start: "22:00", end: "23:30", mins: 90 },
+                        ].map((chip) => {
+                          const isActive = customStartTime === chip.start && customEndTime === chip.end;
+                          return (
+                            <button
+                              key={chip.label}
+                              type="button"
+                              onClick={() => {
+                                setCustomStartTime(chip.start);
+                                setCustomEndTime(chip.end);
+                                setDailyMinutes(chip.mins);
+                              }}
+                              className={`p-2 rounded-lg text-left text-[10px] border transition-all ${
+                                isActive
+                                  ? "bg-[#7C6CFF]/20 border-[#7C6CFF] text-[#F2F3F8] font-bold"
+                                  : "bg-[#11131F] border-transparent text-[#8B90A8] hover:text-[#F2F3F8] hover:bg-[#171A2B]"
+                              }`}
+                            >
+                              {chip.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Advanced Learning Preferences Accordion */}

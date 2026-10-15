@@ -1,7 +1,7 @@
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'missed' | 'adapted';
 export type GoalLevel = 'beginner' | 'intermediate' | 'advanced';
-export type SchedulePreference = 'morning' | 'afternoon' | 'evening' | 'flexible';
+export type SchedulePreference = 'morning' | 'afternoon' | 'evening' | 'night' | 'flexible' | 'custom';
 
 export interface Task {
   id: string;
@@ -50,6 +50,7 @@ export interface Goal {
   studyDays?: string[];
   learningPreference?: 'videos' | 'reading' | 'practice' | 'projects';
   assessmentMethod?: 'quiz' | 'project' | 'mock_test';
+  customStudyTime?: string;
 }
 
 export interface CheckIn {
