@@ -551,7 +551,11 @@ export const CoachProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       category: newGoalData.category || "coding",
       weakAreas: [],
       strongAreas: [],
-      milestones: defaultMilestones,
+      milestones: newGoalData.milestones && newGoalData.milestones.length > 0 ? newGoalData.milestones : defaultMilestones,
+      targetOutcome: newGoalData.targetOutcome,
+      studyDays: newGoalData.studyDays,
+      learningPreference: newGoalData.learningPreference,
+      assessmentMethod: newGoalData.assessmentMethod,
     };
 
     setGoals((prev) => [newGoal, ...prev]);

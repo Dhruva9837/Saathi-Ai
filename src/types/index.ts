@@ -46,6 +46,10 @@ export interface Goal {
   milestones: Milestone[];
   weakAreas: string[];
   strongAreas: string[];
+  targetOutcome?: string;
+  studyDays?: string[];
+  learningPreference?: 'videos' | 'reading' | 'practice' | 'projects';
+  assessmentMethod?: 'quiz' | 'project' | 'mock_test';
 }
 
 export interface CheckIn {

@@ -26,14 +26,18 @@ export const CreateMilestoneSchema = z.object({
 });
 
 export const CreateGoalSchema = z.object({
-  title: z.string().min(3, "Goal title must be at least 3 characters"),
-  description: z.string().min(5, "Please provide a short description or purpose"),
+  title: z.string().min(2, "Goal title must be at least 2 characters"),
+  description: z.string().optional().default(""),
   targetDeadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
   currentLevel: GoalLevelSchema.default("beginner"),
   dailyMinutesTarget: z.number().min(15).max(480).default(60),
   preferredSchedule: SchedulePreferenceSchema.default("evening"),
   category: z.enum(["coding", "language", "career", "academics", "fitness", "other"]).default("coding"),
+  targetOutcome: z.string().optional(),
   priorExperience: z.string().optional(),
+  studyDays: z.array(z.string()).optional(),
+  learningPreference: z.enum(["videos", "reading", "practice", "projects"]).optional(),
+  assessmentMethod: z.enum(["quiz", "project", "mock_test"]).optional(),
 });
 
 export const SubmitCheckInSchema = z.object({

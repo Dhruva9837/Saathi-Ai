@@ -39,12 +39,14 @@ export async function generateRoadmapPlan(
   const effectiveLevel = input.calibratedLevel || input.currentLevel || "beginner";
 
   // Step 1: Constraint & Feasibility Check
+  const studyDaysCount = input.studyDays && input.studyDays.length > 0 ? input.studyDays.length : 7;
   const feasibility = calculateGoalFeasibility(
     input.title,
     deadlineDays,
     input.dailyMinutesTarget,
     input.category,
-    effectiveLevel
+    effectiveLevel,
+    studyDaysCount
   );
 
   const systemPrompt = `You are Saathi AI's Elite Roadmap Planner & Productivity Coach.
@@ -53,34 +55,34 @@ Generate a structured, progressive learning roadmap for a user who wants to achi
 Follow strict pedagogical guidelines:
 1. Divide the journey into 4-6 distinct, ordered Phases covering the ${deadlineDays}-day timeline.
 2. Include Weekly Objectives and Concrete Tangible Outcomes for each Phase.
-3. Every task must be granular (Learn theory, Practice hands-on, or build a Project).
+3. Every task must be granular (Learn theory, Practice hands-on, or build a Project/Assessment).
 4. Task durations must strictly respect the daily budget of ${input.dailyMinutesTarget} minutes.
-5. Include strategic Project phases and Revision/Buffer days.
+5. Include strategic Project/Practical phases and Revision/Buffer days.
 
 Always output strict JSON conforming to this schema:
 {
   "milestones": [
     {
-      "title": "Phase 1: Foundations & Core Architecture",
+      "title": "Phase 1: Foundations & Core Vocabulary",
       "description": "Master essential concepts and initial mental models.",
       "order": 1,
-      "estimatedDays": 10,
-      "dayRange": "Day 1 - 10",
-      "weeklyObjective": "Understand core mental models and set up developer environment.",
-      "expectedOutcome": "Build and run your first working base application.",
+      "estimatedDays": 15,
+      "dayRange": "Day 1 - 15",
+      "weeklyObjective": "Understand core fundamentals and baseline vocabulary.",
+      "expectedOutcome": "Formulate basic expressions and complete initial exercises.",
       "tasks": [
         {
-          "title": "Core Architecture & Fundamentals",
-          "description": "Learn key concepts and mental models.",
+          "title": "Pronunciation, Alphabet & Core Vocabulary",
+          "description": "Learn phonetics, alphabet sounds, and essential greetings.",
           "difficulty": "easy",
           "estimatedMinutes": ${Math.min(input.dailyMinutesTarget, 45)},
           "priority": "high",
-          "topic": "Architecture",
+          "topic": "Fundamentals",
           "type": "learn"
         },
         {
-          "title": "Hands-on Practice Drill",
-          "description": "Implement initial practical exercises.",
+          "title": "Active Practice & Drill",
+          "description": "Reinforce concepts with structured hands-on drills.",
           "difficulty": "easy",
           "estimatedMinutes": ${input.dailyMinutesTarget},
           "priority": "high",
@@ -93,11 +95,13 @@ Always output strict JSON conforming to this schema:
 }`;
 
   const userPrompt = `Goal: ${input.title}
-Scope Focus: ${feasibility.suggestedFocusScope || input.description || "Comprehensive Mastery"}
-Total Timeline: ${deadlineDays} Days (${feasibility.totalHours} total available hours)
+Target Outcome / Success Definition: ${input.targetOutcome || input.description || "Comprehensive Mastery"}
+Total Timeline: ${deadlineDays} Days (${feasibility.totalHours} total available hours, ${studyDaysCount} study days/week)
 Daily Time Budget: ${input.dailyMinutesTarget} minutes/day (${input.preferredSchedule} preference)
 Calibrated Starting Level: ${effectiveLevel} (Diagnostic Score: ${input.diagnosticScore ?? "N/A"})
 Category: ${input.category}
+Learning Preference: ${input.learningPreference || "Hands-on practice & structured drills"}
+Assessment Method: ${input.assessmentMethod || "Milestone quizzes & mock test"}
 
 Generate 4-5 phased milestones with explicit Day Ranges and actionable tasks fitting ${input.dailyMinutesTarget} mins daily. Return ONLY valid JSON.`;
 
@@ -148,131 +152,271 @@ function generateDeterministicPhases(
   dailyMinutes: number,
   level: string
 ): GeneratedMilestone[] {
-  const isCoding = category === "coding" || title.toLowerCase().includes("next.js") || title.toLowerCase().includes("react") || title.toLowerCase().includes("dsa");
+  const isLanguage =
+    category === "language" ||
+    title.toLowerCase().includes("french") ||
+    title.toLowerCase().includes("spanish") ||
+    title.toLowerCase().includes("japanese") ||
+    title.toLowerCase().includes("jlpt") ||
+    title.toLowerCase().includes("german") ||
+    title.toLowerCase().includes("language");
 
-  if (isCoding && title.toLowerCase().includes("next.js")) {
-    const p1Days = Math.round(totalDays * 0.16);
-    const p2Days = Math.round(totalDays * 0.20);
-    const p3Days = Math.round(totalDays * 0.25);
-    const p4Days = Math.round(totalDays * 0.18);
-    const p5Days = totalDays - (p1Days + p2Days + p3Days + p4Days);
+  if (isLanguage) {
+    const p1 = Math.round(totalDays * 0.25);
+    const p2 = Math.round(totalDays * 0.25);
+    const p3 = Math.round(totalDays * 0.25);
+    const p4 = totalDays - (p1 + p2 + p3);
 
     return [
       {
-        title: "Phase 1: Next.js Architecture & App Router",
-        description: "Mental models of Server vs Client components, layouts, and file-based routing conventions.",
+        title: "Phase 1: Foundations & Core Vocabulary",
+        description: "Pronunciation, alphabet, basic vocabulary, numbers, and everyday greetings.",
         order: 1,
-        estimatedDays: p1Days,
-        dayRange: `Day 1 - ${p1Days}`,
-        weeklyObjective: "Understand App Router, server vs client boundaries, and layouts.",
-        expectedOutcome: "Build a multi-page interactive web application.",
+        estimatedDays: p1,
+        dayRange: `Day 1 - ${p1}`,
+        weeklyObjective: "Master phonetic accents, pronunciation rules, and initial 150 survival words.",
+        expectedOutcome: "Introduce yourself comfortably, count, and pronounce words accurately.",
         tasks: [
           {
-            title: "Next.js 14/15 Architecture & Component Trees",
-            description: "Learn server components, client components, and directive boundaries.",
+            title: "Alphabet, Phonetics & Pronunciation Rules",
+            description: "Study key phonetic sounds, silent letters, and vowel accents.",
             difficulty: "easy",
             estimatedMinutes: Math.min(dailyMinutes, 45),
             priority: "high",
-            topic: "App Router",
+            topic: "Phonetics",
             type: "learn",
           },
           {
-            title: "Nested Layouts & Dynamic Routing Lab",
-            description: "Create dynamic parameter routes `[slug]` and nested dashboard layouts.",
+            title: "Basic Greetings & Everyday Vocabulary Drill",
+            description: "Memorize first 50 essential survival expressions with flashcards.",
+            difficulty: "easy",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "Vocabulary",
+            type: "practice",
+          },
+          {
+            title: "Numbers, Days, Months & Personal Pronouns",
+            description: "Practice counting, expressing dates, and subject pronouns.",
+            difficulty: "easy",
+            estimatedMinutes: Math.min(dailyMinutes, 45),
+            priority: "medium",
+            topic: "Core Syntax",
+            type: "learn",
+          },
+        ],
+      },
+      {
+        title: "Phase 2: Core Grammar & Sentence Construction",
+        description: "Articles, verbs conjugation, sentence construction, and listening comprehension.",
+        order: 2,
+        estimatedDays: p2,
+        dayRange: `Day ${p1 + 1} - ${p1 + p2}`,
+        weeklyObjective: "Conjugate high-frequency verbs in present tense and form questions and negative statements.",
+        expectedOutcome: "Construct full grammatical sentences and follow beginner conversational audio.",
+        tasks: [
+          {
+            title: "Articles, Gender Rules & Plurals",
+            description: "Learn definite/indefinite articles and noun gender patterns.",
+            difficulty: "medium",
+            estimatedMinutes: Math.min(dailyMinutes, 45),
+            priority: "high",
+            topic: "Grammar",
+            type: "learn",
+          },
+          {
+            title: "Essential Verbs & Present Tense Conjugation",
+            description: "Master regular verbs and top irregular verbs (être, avoir, aller, faire).",
             difficulty: "medium",
             estimatedMinutes: dailyMinutes,
             priority: "high",
-            topic: "Routing",
+            topic: "Conjugation",
+            type: "practice",
+          },
+          {
+            title: "Sentence Construction & Listening Drills",
+            description: "Form questions, negation, and listen to spoken dialogue audio.",
+            difficulty: "medium",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "Listening",
             type: "practice",
           },
         ],
       },
       {
-        title: "Phase 2: Data Fetching, Mutations & Server Actions",
-        description: "Parallel data fetching, caching strategies, revalidation, and secure Server Actions.",
-        order: 2,
-        estimatedDays: p2Days,
-        dayRange: `Day ${p1Days + 1} - ${p1Days + p2Days}`,
-        weeklyObjective: "Master server-side data fetching and form mutations.",
-        expectedOutcome: "Connect database queries directly to Server Components.",
+        title: "Phase 3: Practical Immersion & Conversational Usage",
+        description: "Reading, writing, conversation, and real-world comprehension exercises.",
+        order: 3,
+        estimatedDays: p3,
+        dayRange: `Day ${p1 + p2 + 1} - ${p1 + p2 + p3}`,
+        weeklyObjective: "Hold 10-15 minute daily situational dialogues, read dialogues, and write short paragraphs.",
+        expectedOutcome: "Communicate in travel, restaurant, and everyday scenarios with natural pacing.",
         tasks: [
           {
-            title: "Async Server Components & Fetch Cache Tags",
-            description: "Implement `fetch` caching options and revalidatePath triggers.",
+            title: "Situational Roleplay & Conversational Drills",
+            description: "Practice ordering food, asking directions, and introducing friends.",
+            difficulty: "medium",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "Conversation",
+            type: "practice",
+          },
+          {
+            title: "Short Story Reading & Comprehension Lab",
+            description: "Read graded reader paragraphs and answer comprehension questions.",
             difficulty: "medium",
             estimatedMinutes: Math.min(dailyMinutes, 50),
             priority: "high",
-            topic: "Data Fetching",
-            type: "learn",
-          },
-          {
-            title: "Server Actions & Optimistic UI Updates",
-            description: "Build interactive form actions with `useOptimistic` hook.",
-            difficulty: "medium",
-            estimatedMinutes: dailyMinutes,
-            priority: "high",
-            topic: "Server Actions",
+            topic: "Reading",
             type: "practice",
           },
-        ],
-      },
-      {
-        title: "Phase 3: Full-Stack Auth, Middleware & DB Integration",
-        description: "Supabase / PostgreSQL database integration, user session tokens, and route protection.",
-        order: 3,
-        estimatedDays: p3Days,
-        dayRange: `Day ${p1Days + p2Days + 1} - ${p1Days + p2Days + p3Days}`,
-        weeklyObjective: "Build authenticated user flows with edge middleware.",
-        expectedOutcome: "A secure end-to-end full-stack SaaS shell with auth & database.",
-        tasks: [
           {
-            title: "Supabase SSR Auth & Edge Middleware",
-            description: "Implement cookie-based session management and protected route handlers.",
+            title: "Daily Journal Writing & Audio Shadowing",
+            description: "Write 5 sentences about your day and repeat after native speakers.",
             difficulty: "hard",
-            estimatedMinutes: dailyMinutes,
-            priority: "high",
-            topic: "Authentication",
-            type: "practice",
-          },
-        ],
-      },
-      {
-        title: "Phase 4: Production Capstone Project",
-        description: "Build a production-grade full-stack Next.js project with styling, caching, and database.",
-        order: 4,
-        estimatedDays: p4Days,
-        dayRange: `Day ${p1Days + p2Days + p3Days + 1} - ${totalDays - p5Days}`,
-        weeklyObjective: "Synthesize all concepts into a portfolio-ready product.",
-        expectedOutcome: "Deploy live production app on Vercel with CI/CD.",
-        tasks: [
-          {
-            title: "Capstone System Design & Database Schema",
-            description: "Design relational schema, component hierarchy, and API contracts.",
-            difficulty: "hard",
-            estimatedMinutes: dailyMinutes,
-            priority: "high",
-            topic: "Project",
-            type: "project",
-          },
-        ],
-      },
-      {
-        title: "Phase 5: Performance Optimization & Buffer Review",
-        description: "Core Web Vitals profiling, dynamic imports, SEO metadata, and final polish.",
-        order: 5,
-        estimatedDays: p5Days,
-        dayRange: `Day ${totalDays - p5Days + 1} - ${totalDays}`,
-        weeklyObjective: "Polish edge cases, optimize performance, and conduct final review.",
-        expectedOutcome: "Lighthouse 95+ score and production deployment.",
-        tasks: [
-          {
-            title: "Bundle Analysis & Image/Font Optimization",
-            description: "Run `@next/bundle-analyzer` and optimize layout shifts.",
-            difficulty: "medium",
             estimatedMinutes: dailyMinutes,
             priority: "medium",
-            topic: "Optimization",
+            topic: "Writing",
+            type: "practice",
+          },
+        ],
+      },
+      {
+        title: "Phase 4: Revision, Mock Assessment & Weak Areas",
+        description: "Revision, mock tests, weak areas repair, and retention polish.",
+        order: 4,
+        estimatedDays: p4,
+        dayRange: `Day ${p1 + p2 + p3 + 1} - ${totalDays}`,
+        weeklyObjective: "Reinforce difficult grammar points and take a full benchmark mock test.",
+        expectedOutcome: "Attain 85%+ score on target proficiency benchmark and confident retention.",
+        tasks: [
+          {
+            title: "Full-Length Benchmark Mock Proficiency Test",
+            description: "Simulate an official level assessment (reading, listening, grammar).",
+            difficulty: "hard",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "Assessment",
+            type: "project",
+          },
+          {
+            title: "Targeted Weak Areas & Spaced Repetition Drill",
+            description: "Review missed test questions and drill high-friction conjugations.",
+            difficulty: "medium",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "Revision",
             type: "revision",
+          },
+        ],
+      },
+    ];
+  }
+
+  const isDSA = title.toLowerCase().includes("dsa") || title.toLowerCase().includes("algorithm") || title.toLowerCase().includes("leetcode");
+  if (isDSA) {
+    const p1 = Math.round(totalDays * 0.25);
+    const p2 = Math.round(totalDays * 0.30);
+    const p3 = Math.round(totalDays * 0.25);
+    const p4 = totalDays - (p1 + p2 + p3);
+
+    return [
+      {
+        title: "Phase 1: Linear Structures & Two Pointers",
+        description: "Arrays, String manipulation, HashMaps, Two Pointers, and Sliding Window.",
+        order: 1,
+        estimatedDays: p1,
+        dayRange: `Day 1 - ${p1}`,
+        weeklyObjective: "Master core array patterns and complexity tradeoffs.",
+        expectedOutcome: "Solve 20+ foundational LeetCode Easy/Medium problems with clean code.",
+        tasks: [
+          {
+            title: "Arrays, HashMaps & Frequency Counters",
+            description: "Implement Two-Sum, Group Anagrams, and frequency hashing.",
+            difficulty: "easy",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "Arrays",
+            type: "practice",
+          },
+          {
+            title: "Two Pointers & Sliding Window Patterns",
+            description: "Solve Container With Most Water, 3Sum, and Best Time to Buy/Sell Stock.",
+            difficulty: "medium",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "Pointers",
+            type: "practice",
+          },
+        ],
+      },
+      {
+        title: "Phase 2: Recursion, Trees & Graph Traversals",
+        description: "Linked Lists, Binary Trees, BFS, DFS, and Topological Sorting.",
+        order: 2,
+        estimatedDays: p2,
+        dayRange: `Day ${p1 + 1} - ${p1 + p2}`,
+        weeklyObjective: "Master tree recursions and graph connectivity algorithms.",
+        expectedOutcome: "Write tree traversals and graph BFS/DFS without templates.",
+        tasks: [
+          {
+            title: "Binary Tree Traversals & Depth Calculation",
+            description: "Solve Maximum Depth, Invert Tree, and Level Order Traversal.",
+            difficulty: "medium",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "Trees",
+            type: "practice",
+          },
+          {
+            title: "Graph BFS/DFS & Island Counting",
+            description: "Implement Number of Islands, Clone Graph, and Course Schedule.",
+            difficulty: "hard",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "Graphs",
+            type: "practice",
+          },
+        ],
+      },
+      {
+        title: "Phase 3: Dynamic Programming & Heaps",
+        description: "1D/2D Dynamic Programming, Backtracking, and Priority Queues.",
+        order: 3,
+        estimatedDays: p3,
+        dayRange: `Day ${p1 + p2 + 1} - ${p1 + p2 + p3}`,
+        weeklyObjective: "Recognize optimal substructure and subproblem recurrence.",
+        expectedOutcome: "Formulate DP states and solve Coin Change, Longest Subsequence.",
+        tasks: [
+          {
+            title: "1D Dynamic Programming Foundations",
+            description: "Solve Climbing Stairs, House Robber, and Coin Change.",
+            difficulty: "hard",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "DP",
+            type: "practice",
+          },
+        ],
+      },
+      {
+        title: "Phase 4: Timed Mock Interviews & Polish",
+        description: "Mock technical interview sessions, blind-75 speed solving, and revision.",
+        order: 4,
+        estimatedDays: p4,
+        dayRange: `Day ${p1 + p2 + p3 + 1} - ${totalDays}`,
+        weeklyObjective: "Communicate solution approach in 35-minute timed sessions.",
+        expectedOutcome: "Ready for live technical screen with high confidence.",
+        tasks: [
+          {
+            title: "Timed 45-Min LeetCode Simulation",
+            description: "Solve 2 unseen problems with active verbal explanation.",
+            difficulty: "hard",
+            estimatedMinutes: dailyMinutes,
+            priority: "high",
+            topic: "Mock Interview",
+            type: "project",
           },
         ],
       },

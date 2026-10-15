@@ -30,10 +30,11 @@ export async function callLLM({
   if (geminiKey && geminiKey.length > 10 && !geminiKey.includes("your-gemini")) {
     const activeGeminiModels = [
       "gemini-3.6-flash",
-      "gemini-3.8-flash",
+      "gemini-3.5-flash-lite",
       "gemini-3.1-flash-lite",
       "gemini-flash-lite-latest",
-      "gemini-flash-latest",
+      "gemini-3-flash-preview",
+      "gemini-3.8-flash",
     ];
 
     for (const model of activeGeminiModels) {
@@ -59,21 +60,29 @@ export async function callLLM({
           };
         }
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 9000);
+
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         if (res.ok) {
           const data = await res.json();
           const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (responseText && responseText.trim().length > 0) {
+            console.log(`[Saathi AI] Generated response using Gemini model: ${model}`);
             return responseText.trim();
           }
+        } else {
+          console.warn(`[Saathi AI] Model ${model} returned status ${res.status}`);
         }
-      } catch (err) {
-        // Try next model in list
+      } catch (err: any) {
+        console.warn(`[Saathi AI] Model ${model} attempt error:`, err?.message || err);
       }
     }
   }
