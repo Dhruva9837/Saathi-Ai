@@ -204,26 +204,57 @@ export function validateRoadmap(
   };
 }
 
-/**
- * Preset diagnostic question generator for rapid baseline calibration
- */
-export function getDiagnosticQuestions(goalTitle: string, category: string): DiagnosticQuestion[] {
-  const titleLower = goalTitle.toLowerCase();
+export function getDiagnosticQuestions(
+  goalTitle: string,
+  category: string,
+  targetOutcome?: string
+): DiagnosticQuestion[] {
+  const combined = `${goalTitle || ""} ${category || ""} ${targetOutcome || ""}`.toLowerCase();
+  const titleLower = (goalTitle || "").toLowerCase();
 
-  // Language Diagnostic (French, Japanese, Spanish, etc.)
-  if (
+  // 1. Language Diagnostic (French, Spanish, Japanese, German, etc.)
+  const isLanguage =
     category === "language" ||
-    titleLower.includes("french") ||
-    titleLower.includes("japanese") ||
-    titleLower.includes("jlpt") ||
-    titleLower.includes("spanish") ||
-    titleLower.includes("german") ||
-    titleLower.includes("language")
-  ) {
+    combined.includes("french") ||
+    combined.includes("japanese") ||
+    combined.includes("jlpt") ||
+    combined.includes("spanish") ||
+    combined.includes("german") ||
+    combined.includes("italian") ||
+    combined.includes("chinese") ||
+    combined.includes("korean") ||
+    combined.includes("russian") ||
+    combined.includes("english") ||
+    combined.includes("language") ||
+    combined.includes("a1 level") ||
+    combined.includes("a2 level") ||
+    combined.includes("b1 level") ||
+    combined.includes("b2 level") ||
+    combined.includes("delf");
+
+  if (isLanguage) {
+    const langName = combined.includes("french") || combined.includes("delf")
+      ? "French"
+      : combined.includes("japanese") || combined.includes("jlpt")
+      ? "Japanese"
+      : combined.includes("spanish") || combined.includes("dele")
+      ? "Spanish"
+      : combined.includes("german")
+      ? "German"
+      : combined.includes("italian")
+      ? "Italian"
+      : combined.includes("chinese")
+      ? "Chinese"
+      : combined.includes("korean")
+      ? "Korean"
+      : combined.includes("russian")
+      ? "Russian"
+      : "this language";
+
     return [
       {
         id: "q1",
-        question: "How familiar are you with the alphabet, pronunciation, and basic vocabulary of this language?",
+        question: `How familiar are you with ${langName} alphabet, pronunciation, and basic vocabulary?`,
         topic: "Phonetics & Vocabulary Baseline",
         options: [
           { label: "A", text: "Complete beginner — starting from zero (letters, accents, sounds).", points: 1 },
@@ -233,7 +264,7 @@ export function getDiagnosticQuestions(goalTitle: string, category: string): Dia
       },
       {
         id: "q2",
-        question: "What is your comfort level with sentence grammar and verb conjugations?",
+        question: `What is your comfort level with ${langName} sentence grammar and verb conjugations?`,
         topic: "Grammar & Conjugation",
         options: [
           { label: "A", text: "I do not know how verbs are conjugated or how sentences are formed.", points: 1 },
@@ -243,7 +274,7 @@ export function getDiagnosticQuestions(goalTitle: string, category: string): Dia
       },
       {
         id: "q3",
-        question: "How do you rate your conversational listening and speaking ability?",
+        question: `How do you rate your conversational listening and speaking ability in ${langName}?`,
         topic: "Comprehension & Fluency",
         options: [
           { label: "A", text: "Cannot understand spoken dialogue unless spoken word-by-word with subtitles.", points: 1 },
@@ -254,8 +285,14 @@ export function getDiagnosticQuestions(goalTitle: string, category: string): Dia
     ];
   }
 
-  // DSA & Problem Solving
-  if (titleLower.includes("dsa") || titleLower.includes("algorithm") || titleLower.includes("leetcode")) {
+  // 2. DSA & Problem Solving
+  const isDSA =
+    titleLower.includes("dsa") ||
+    titleLower.includes("algorithm") ||
+    titleLower.includes("leetcode") ||
+    titleLower.includes("problem solving");
+
+  if (isDSA) {
     return [
       {
         id: "q1",
@@ -290,8 +327,60 @@ export function getDiagnosticQuestions(goalTitle: string, category: string): Dia
     ];
   }
 
-  // Coding & Web Development
-  if (titleLower.includes("next.js") || titleLower.includes("react") || category === "coding") {
+  // 3. Python & Machine Learning
+  const isPythonOrAI =
+    titleLower.includes("python") ||
+    titleLower.includes("machine learning") ||
+    titleLower.includes("deep learning") ||
+    titleLower.includes("ai engineer") ||
+    titleLower.includes("data science");
+
+  if (isPythonOrAI) {
+    return [
+      {
+        id: "q1",
+        question: "What is your comfort level with Python syntax, data structures, and functions?",
+        topic: "Python Core",
+        options: [
+          { label: "A", text: "New to Python, still learning syntax and list comprehensions.", points: 1 },
+          { label: "B", text: "Comfortable writing clean scripts, functions, and working with libraries.", points: 2 },
+          { label: "C", text: "Advanced proficiency: generators, decorators, OOP, and profiling.", points: 3 },
+        ],
+      },
+      {
+        id: "q2",
+        question: "How experienced are you with NumPy, Pandas, and data wrangling pipelines?",
+        topic: "Data Manipulation",
+        options: [
+          { label: "A", text: "Haven't used Pandas or struggle with vectorization.", points: 1 },
+          { label: "B", text: "Regularly clean datasets, use groupby, merging, and transformations.", points: 2 },
+          { label: "C", text: "Write high-performance vectorized operations and custom pipeline transformers.", points: 3 },
+        ],
+      },
+      {
+        id: "q3",
+        question: "Have you trained, evaluated, and deployed machine learning or deep learning models?",
+        topic: "Model Architecture",
+        options: [
+          { label: "A", text: "Understand concepts theoretically, but haven't trained models.", points: 1 },
+          { label: "B", text: "Have trained scikit-learn models and fine-tuned basic neural nets.", points: 2 },
+          { label: "C", text: "Have built production ML/LLM pipelines with PyTorch/HuggingFace and evaluation.", points: 3 },
+        ],
+      },
+    ];
+  }
+
+  // 4. Web Development (Next.js, React, Frontend, Fullstack)
+  const isWebDev =
+    titleLower.includes("next.js") ||
+    titleLower.includes("react") ||
+    titleLower.includes("javascript") ||
+    titleLower.includes("typescript") ||
+    titleLower.includes("frontend") ||
+    titleLower.includes("web") ||
+    (category === "coding" && !isDSA && !isLanguage && !isPythonOrAI);
+
+  if (isWebDev) {
     return [
       {
         id: "q1",
@@ -326,36 +415,36 @@ export function getDiagnosticQuestions(goalTitle: string, category: string): Dia
     ];
   }
 
-  // Default diagnostic for other domains
+  // 5. Universal Fallback tailored to the actual goal name
   return [
     {
       id: "q1",
-      question: `What is your prior exposure to ${goalTitle}?`,
-      topic: "Prior Experience",
+      question: `What is your prior experience and baseline knowledge with ${goalTitle}?`,
+      topic: "Baseline Experience",
       options: [
-        { label: "A", text: "Completely new, starting from zero baseline.", points: 1 },
-        { label: "B", text: "Have read/watched tutorials and know basic terminology.", points: 2 },
-        { label: "C", text: "Have applied it in practice and looking for advanced mastery.", points: 3 },
+        { label: "A", text: "Complete beginner — starting from zero fundamentals.", points: 1 },
+        { label: "B", text: "Have basic knowledge and practical understanding of key concepts.", points: 2 },
+        { label: "C", text: "Intermediate to advanced practitioner looking for mastery.", points: 3 },
       ],
     },
     {
       id: "q2",
-      question: "How do you usually handle complex errors or roadblocks in this subject?",
-      topic: "Problem Solving",
+      question: `How independently can you solve problems and apply concepts in ${goalTitle}?`,
+      topic: "Practical Independence",
       options: [
-        { label: "A", text: "I easily get stuck and require step-by-step guidance.", points: 1 },
-        { label: "B", text: "I search documentation and can debug standard errors.", points: 2 },
-        { label: "C", text: "I can independently troubleshoot, profile, and optimize solutions.", points: 3 },
+        { label: "A", text: "Need step-by-step guidance and structured walkthroughs.", points: 1 },
+        { label: "B", text: "Can build standard exercises and debug common roadblocks with docs.", points: 2 },
+        { label: "C", text: "Can independently execute advanced workflows from scratch.", points: 3 },
       ],
     },
     {
       id: "q3",
-      question: "What is your target outcome for this roadmap?",
-      topic: "Outcome Focus",
+      question: `What target benchmark represents successful completion of ${goalTitle} for you?`,
+      topic: "Outcome Alignment",
       options: [
-        { label: "A", text: "Get solid foundational grasp and confidence.", points: 1 },
-        { label: "B", text: "Build 2-3 portfolio-ready projects independently.", points: 2 },
-        { label: "C", text: "Crack rigorous technical benchmarks / professional usage.", points: 3 },
+        { label: "A", text: "Solid conceptual grasp and basic conversational/practical confidence.", points: 1 },
+        { label: "B", text: "Build 2-3 substantial projects or pass standard benchmark tests.", points: 2 },
+        { label: "C", text: "High-stakes professional execution, certification, or technical screen.", points: 3 },
       ],
     },
   ];

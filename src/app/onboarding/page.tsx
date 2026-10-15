@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useCoach } from "@/context/CoachContext";
 import { createGoalWithMilestonesAction } from "@/server/actions/goals";
@@ -202,32 +202,42 @@ export default function OnboardingPage() {
     },
   ];
 
-  // Fetch Diagnostic questions when entering Step 2
-  useEffect(() => {
-    if (step === 2) {
-      setIsQuizLoading(true);
-      fetch("/api/ai/diagnostic", {
+  // Fetch Diagnostic questions when entering Step 2 or on manual re-diagnose
+  const fetchDiagnosticQuestions = useCallback(async () => {
+    setIsQuizLoading(true);
+    try {
+      const res = await fetch("/api/ai/diagnostic", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goalTitle, category: goalCategory }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.questions && data.questions.length > 0) {
-            setDiagnosticQuestions(data.questions);
-            const initial: Record<string, number> = {};
-            const defPoint =
-              selfLevel === "beginner" ? 1 : selfLevel === "intermediate" ? 2 : 3;
-            data.questions.forEach((q: DiagnosticQ) => {
-              initial[q.id] = defPoint;
-            });
-            setQuizAnswers(initial);
-          }
-        })
-        .catch((err) => console.warn("Diagnostic fetch error:", err))
-        .finally(() => setIsQuizLoading(false));
+        body: JSON.stringify({
+          goalTitle,
+          category: goalCategory,
+          targetOutcome,
+        }),
+      });
+      const data = await res.json();
+      if (data.questions && data.questions.length > 0) {
+        setDiagnosticQuestions(data.questions);
+        const initial: Record<string, number> = {};
+        const defPoint =
+          selfLevel === "beginner" ? 1 : selfLevel === "intermediate" ? 2 : 3;
+        data.questions.forEach((q: DiagnosticQ) => {
+          initial[q.id] = defPoint;
+        });
+        setQuizAnswers(initial);
+      }
+    } catch (err) {
+      console.warn("Diagnostic fetch error:", err);
+    } finally {
+      setIsQuizLoading(false);
     }
-  }, [step, goalTitle, goalCategory]);
+  }, [goalTitle, goalCategory, targetOutcome, selfLevel]);
+
+  useEffect(() => {
+    if (step === 2) {
+      fetchDiagnosticQuestions();
+    }
+  }, [step, fetchDiagnosticQuestions]);
 
   // Recalculate calibrated level when quiz answers change
   useEffect(() => {
@@ -586,7 +596,58 @@ export default function OnboardingPage() {
                 <input
                   type="text"
                   value={goalTitle}
-                  onChange={(e) => setGoalTitle(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setGoalTitle(val);
+                    const lower = val.toLowerCase();
+                    if (
+                      lower.includes("french") ||
+                      lower.includes("spanish") ||
+                      lower.includes("german") ||
+                      lower.includes("japanese") ||
+                      lower.includes("chinese") ||
+                      lower.includes("korean") ||
+                      lower.includes("russian") ||
+                      lower.includes("italian") ||
+                      lower.includes("english") ||
+                      lower.includes("language") ||
+                      lower.includes("jlpt") ||
+                      lower.includes("vocab")
+                    ) {
+                      setGoalCategory("language");
+                    } else if (
+                      lower.includes("dsa") ||
+                      lower.includes("react") ||
+                      lower.includes("next") ||
+                      lower.includes("code") ||
+                      lower.includes("python") ||
+                      lower.includes("javascript") ||
+                      lower.includes("typescript") ||
+                      lower.includes("algorithm") ||
+                      lower.includes("frontend") ||
+                      lower.includes("backend")
+                    ) {
+                      setGoalCategory("coding");
+                    } else if (
+                      lower.includes("gym") ||
+                      lower.includes("fitness") ||
+                      lower.includes("workout") ||
+                      lower.includes("running") ||
+                      lower.includes("marathon") ||
+                      lower.includes("muscle")
+                    ) {
+                      setGoalCategory("fitness");
+                    } else if (
+                      lower.includes("job") ||
+                      lower.includes("interview") ||
+                      lower.includes("resume") ||
+                      lower.includes("career") ||
+                      lower.includes("cfa") ||
+                      lower.includes("mba")
+                    ) {
+                      setGoalCategory("career");
+                    }
+                  }}
                   placeholder="e.g. Learn French, Master Next.js, Complete DSA, Machine Learning"
                   className="w-full px-4 py-2.5 rounded-xl bg-[#0A0B14] border border-[rgba(255,255,255,0.07)] text-xs text-[#F2F3F8] focus:border-[#7C6CFF] focus:outline-none transition-colors"
                 />
@@ -713,9 +774,21 @@ export default function OnboardingPage() {
                     <HelpCircle className="h-3.5 w-3.5 text-[#7C6CFF]" />
                     <span>AI Diagnostic Calibration Check</span>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#3DDC97]/15 text-[#3DDC97] font-semibold border border-[#3DDC97]/30">
-                    Calibrated: {calibratedLevel.toUpperCase()}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fetchDiagnosticQuestions()}
+                      disabled={isQuizLoading}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold text-[#7C6CFF] hover:bg-[#7C6CFF]/10 transition-colors border border-[#7C6CFF]/30 disabled:opacity-50"
+                      title="Re-run AI Calibration questions for this goal"
+                    >
+                      <RefreshCw className={`h-2.5 w-2.5 ${isQuizLoading ? "animate-spin" : ""}`} />
+                      <span>Re-diagnose</span>
+                    </button>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#3DDC97]/15 text-[#3DDC97] font-semibold border border-[#3DDC97]/30">
+                      Calibrated: {calibratedLevel.toUpperCase()}
+                    </span>
+                  </div>
                 </div>
 
                 {isQuizLoading ? (
